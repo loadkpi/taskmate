@@ -1,5 +1,6 @@
 require "thor"
 require "taskmate/version"
+require "taskmate/cli/commands/init"
 
 module Taskmate
   module CLI
@@ -13,6 +14,13 @@ module Taskmate
       desc "version", "Print Taskmate version"
       def version
         puts Taskmate::VERSION
+      end
+
+      desc "init", "Initialize a Taskmate workspace in the current directory"
+      option :non_interactive, type: :boolean, default: false,
+             desc: "Use defaults without interactive prompts (for CI)"
+      def init
+        Commands::Init.new(options).call(Dir.pwd)
       end
 
       def self.handle_no_command_error(command, has_namespace = $thor_runner)
