@@ -69,6 +69,7 @@ module Taskmate
       end
 
       desc "review KEY", "Review issue quality with AI"
+      option :format, type: :string, default: "text", desc: "Output format: text or json"
       def review(key)
         with_error_handling { Commands::Review.new(options).call(key, Dir.pwd) }
       end
@@ -150,6 +151,7 @@ module Taskmate
       desc "workspace SUBCOMMAND", "Workspace commands"
       subcommand "workspace", Class.new(Thor) {
         desc "status", "Show sync status of all local issues"
+        option :format, type: :string, default: "text", desc: "Output format: text or json"
         define_method(:status) do
           begin
             Commands::Workspace.new(options).status(Dir.pwd)

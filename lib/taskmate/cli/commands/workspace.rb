@@ -4,13 +4,26 @@ module Taskmate
   module CLI
     module Commands
       class Workspace
+        VALID_FORMATS = %w[text json].freeze
+
         def initialize(options = {})
           @options = options
         end
 
         def status(workspace_path = Dir.pwd)
+          fmt = @options[:format].to_s
+          fmt = "text" if fmt.empty?
+          unless VALID_FORMATS.include?(fmt)
+            raise Taskmate::ValidationError, "Invalid format '#{fmt}'. Valid: #{VALID_FORMATS.join(", ")}"
+          end
+
           result = Core::WorkspaceStatus.new(workspace_path: workspace_path).call
-          render_status(result)
+
+          if fmt == "json"
+            render_status_json(result)
+          else
+            render_status(result)
+          end
         end
 
         private
@@ -29,6 +42,20 @@ module Taskmate
             puts "\nUnresolved conflict files (#{result.conflict_files.size}):"
             result.conflict_files.each { |f| puts "  ! #{File.basename(f)}" }
           end
+        end
+
+        def render_status_json(result)
+          require "json"
+          puts JSON.pretty_generate(
+            "local_changed"  => result.local_changed.map { |i| issue_summary(i) },
+            "new_local"      => result.new_local.map { |i| issue_summary(i) },
+            "clean"          => result.clean.map { |i| issue_summary(i) },
+            "conflict_files" => result.conflict_files.map { |f| File.basename(f) }
+          )
+        end
+
+        def issue_summary(issue)
+          { "key" => issue.key, "summary" => issue.summary }
         end
 
         def print_section(header, issues, prefix)
