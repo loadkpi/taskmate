@@ -1,0 +1,21 @@
+# Project internals
+.ai-sandbox
+.ai
+.mcp.json
+.claude
+
+# Ruby / Bundler
+/.bundle/
+/vendor/bundle
+*.gem
+*.rbc
+.ruby-version-local
+
+# RSpec
+/coverage/
+/.rspec_status
+
+# Temp / OS
+tmp/
+*.swp
+.DS_Store
