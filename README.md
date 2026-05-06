@@ -208,6 +208,17 @@ taskmate skills diff improve-task
 
 ---
 
+## Examples
+
+See the [`examples/`](examples/) directory for a pre-populated sample workspace
+and an offline demo script you can run immediately without a real Jira connection:
+
+```bash
+bash examples/demo.sh
+```
+
+---
+
 ## Contributing
 
 1. Fork the repo
