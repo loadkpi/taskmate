@@ -6,6 +6,10 @@ require "taskmate/cli/commands/workspace"
 require "taskmate/cli/commands/show"
 require "taskmate/cli/commands/diff"
 require "taskmate/cli/commands/pull"
+require "taskmate/cli/commands/improve"
+require "taskmate/cli/commands/review"
+require "taskmate/cli/commands/create_task"
+require "taskmate/cli/commands/skills"
 
 module Taskmate
   module CLI
@@ -53,6 +57,67 @@ module Taskmate
       def pull(key = nil)
         with_error_handling { Commands::Pull.new(options).call(key, Dir.pwd) }
       end
+
+      desc "improve KEY", "Improve an issue with AI assistance"
+      option :instruction, type: :string, desc: "Custom instruction for the AI"
+      option :output,      type: :string, desc: "Write proposed content to this file instead"
+      def improve(key)
+        with_error_handling { Commands::Improve.new(options).call(key, Dir.pwd) }
+      end
+
+      desc "review KEY", "Review issue quality with AI"
+      def review(key)
+        with_error_handling { Commands::Review.new(options).call(key, Dir.pwd) }
+      end
+
+      desc "create-task DESCRIPTION", "Create a new local task with AI assistance"
+      map "draft" => "create-task"
+      def create_task(description)
+        with_error_handling { Commands::CreateTask.new(options).call(description, Dir.pwd) }
+      end
+
+      desc "skills SUBCOMMAND", "Skill management commands"
+      subcommand "skills", Class.new(Thor) {
+        desc "list", "List all skills"
+        option :format, type: :string, default: "text"
+        define_method(:list) do
+          begin
+            Commands::Skills.new(options).list(Dir.pwd)
+          rescue Taskmate::Error => e
+            warn "Error: #{e.message}"; exit 1
+          end
+        end
+
+        desc "show ID", "Show skill details"
+        option :format, type: :string, default: "text"
+        define_method(:show) do |id|
+          begin
+            Commands::Skills.new(options).show(id, Dir.pwd)
+          rescue Taskmate::Error => e
+            warn "Error: #{e.message}"; exit 1
+          end
+        end
+
+        desc "validate", "Validate all skills"
+        option :format, type: :string, default: "text"
+        define_method(:validate) do
+          begin
+            Commands::Skills.new(options).validate(Dir.pwd)
+          rescue Taskmate::Error => e
+            warn "Error: #{e.message}"; exit 1
+          end
+        end
+
+        desc "diff ID", "Diff skill against built-in version"
+        option :format, type: :string, default: "text"
+        define_method(:diff) do |id|
+          begin
+            Commands::Skills.new(options).diff(id, Dir.pwd)
+          rescue Taskmate::Error => e
+            warn "Error: #{e.message}"; exit 1
+          end
+        end
+      }
 
       desc "workspace SUBCOMMAND", "Workspace commands"
       subcommand "workspace", Class.new(Thor) {

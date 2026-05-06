@@ -1,0 +1,29 @@
+required_sections:
+  - Summary
+  - Context
+  - Goal
+  - Scope
+  - Acceptance Criteria
+  - Definition of Done
+
+generic_checks:
+  - task_is_understandable
+  - task_has_clear_goal
+  - acceptance_criteria_are_testable
+  - scope_is_explicit
+  - out_of_scope_is_explicit
+  - dependencies_are_listed
+  - risks_are_listed
+
+backend_checks:
+  - api_contract_defined_if_needed
+  - authorization_defined_if_needed
+  - error_handling_defined_if_needed
+  - observability_defined_if_needed
+  - migration_plan_defined_if_needed
+
+data_checks:
+  - source_of_truth_defined_if_needed
+  - retention_defined_if_needed
+  - backfill_impact_defined_if_needed
+  - schema_contract_defined_if_needed
