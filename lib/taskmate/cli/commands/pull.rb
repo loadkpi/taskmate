@@ -1,5 +1,6 @@
 require "taskmate/core/pull_issue"
 require "taskmate/core/pull_by_jql"
+require "taskmate/cli/output"
 
 module Taskmate
   module CLI
@@ -34,10 +35,12 @@ module Taskmate
         private
 
         def call_single(key, client, workspace_path, fmt)
-          result = Core::PullIssue.new(
-            workspace_path: workspace_path,
-            jira_client:    client
-          ).call(key)
+          result = CLI::Output.with_spinner("Pulling #{key} from Jira") do
+            Core::PullIssue.new(
+              workspace_path: workspace_path,
+              jira_client:    client
+            ).call(key)
+          end
 
           if fmt == "json"
             render_single_json(result)
@@ -47,10 +50,12 @@ module Taskmate
         end
 
         def call_jql(jql, limit, client, workspace_path, fmt)
-          batch = Core::PullByJql.new(
-            workspace_path: workspace_path,
-            jira_client:    client
-          ).call(jql: jql, limit: limit)
+          batch = CLI::Output.with_spinner("Pulling issues via JQL") do
+            Core::PullByJql.new(
+              workspace_path: workspace_path,
+              jira_client:    client
+            ).call(jql: jql, limit: limit)
+          end
 
           if fmt == "json"
             render_batch_json(batch)
@@ -62,10 +67,10 @@ module Taskmate
         end
 
         def render_single_text(result)
-          puts "Pulled #{result.issue_file.key} → #{result.path}"
+          CLI::Output.success("Pulled #{result.issue_file.key} → #{result.path}")
           if result.unsupported_nodes.any?
-            warn "  Warning: unsupported ADF nodes: #{result.unsupported_nodes.join(", ")}"
-            warn "  ADF backup: #{result.adf_backup_path}"
+            CLI::Output.warn("  Warning: unsupported ADF nodes: #{result.unsupported_nodes.join(", ")}")
+            CLI::Output.warn("  ADF backup saved to #{result.adf_backup_path}")
           end
         end
 

@@ -1,5 +1,6 @@
 require "taskmate/core/push_issue"
 require "taskmate/security/policy"
+require "taskmate/cli/output"
 
 module Taskmate
   module CLI
@@ -45,15 +46,16 @@ module Taskmate
 
         def render_text(result)
           if result.dry_run
-            puts "[DRY RUN] Would push #{result.issue_file.key}"
+            CLI::Output.info("[DRY RUN] Would push #{result.issue_file.key}")
             result.action_plan.field_changes.each do |c|
-              puts "  #{c.field}: #{c.from} → #{c.to}"
+              CLI::Output.info("  #{c.field}: #{c.from} → #{c.to}")
             end
-            result.action_plan.warnings.each { |w| warn "  ! #{w}" }
+            result.action_plan.warnings.each { |w| CLI::Output.warn("  ! #{w}") }
           elsif result.applied
-            puts "Pushed #{result.issue_file.key} to Jira."
+            CLI::Output.success("Pushed #{result.issue_file.key} to Jira.")
+            CLI::Output.info("  Audit: #{result.audit_path}") if result.audit_path
           else
-            puts "Push cancelled."
+            CLI::Output.info("Push cancelled.")
           end
         end
 
