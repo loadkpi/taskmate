@@ -18,7 +18,7 @@ module Taskmate
       audit/ai
     ].freeze
 
-    TASKMATEIGNORE_CONTENT = <<~IGNORE
+    TASKMATEIGNORE_CONTENT = <<~IGNORE.freeze
       # Taskmate ignore file (gitignore-like syntax)
       # Files matching these patterns will not be sent to AI
 
@@ -109,9 +109,7 @@ module Taskmate
           default: "disabled"
         )
 
-        if ai_provider != "disabled"
-          @prompt.say("Remember to set the corresponding ENV variable for your provider.")
-        end
+        @prompt.say("Remember to set the corresponding ENV variable for your provider.") if ai_provider != "disabled"
 
         build_config(jira_url: jira_url, project_key: project_key, ai_provider: ai_provider)
       end

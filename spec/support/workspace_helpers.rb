@@ -18,16 +18,14 @@ module WorkspaceHelpers
       initializer.call
     end
 
-    if options[:workspace_yml]
-      File.write(File.join(dir, "workspace.yml"), YAML.dump(options[:workspace_yml]))
-    end
+    File.write(File.join(dir, "workspace.yml"), YAML.dump(options[:workspace_yml])) if options[:workspace_yml]
 
     dir
   end
 
   def cleanup_temp_workspaces
     Array(@temp_dirs).each do |dir|
-      FileUtils.rm_rf(dir) if Dir.exist?(dir)
+      FileUtils.rm_rf(dir)
     end
     @temp_dirs = []
   end
@@ -43,7 +41,7 @@ end
 RSpec.configure do |config|
   config.include WorkspaceHelpers
 
-  config.after(:each) do
+  config.after do
     cleanup_temp_workspaces
   end
 end

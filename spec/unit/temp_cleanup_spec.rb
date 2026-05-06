@@ -20,7 +20,7 @@ RSpec.describe "WorkspaceHelpers#cleanup_temp_workspaces" do
   end
 
   it "does not raise when called with no previously created dirs" do
-    cleanup_temp_workspaces  # reset @temp_dirs to []
+    cleanup_temp_workspaces # reset @temp_dirs to []
     expect { cleanup_temp_workspaces }.not_to raise_error
   end
 end

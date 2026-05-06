@@ -13,8 +13,8 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/taskmate-dev/taskmate"
   spec.license       = "MIT"
   spec.metadata      = {
-    "source_code_uri"       => "https://github.com/taskmate-dev/taskmate",
-    "changelog_uri"         => "https://github.com/taskmate-dev/taskmate/blob/main/CHANGELOG.md",
+    "source_code_uri" => "https://github.com/taskmate-dev/taskmate",
+    "changelog_uri" => "https://github.com/taskmate-dev/taskmate/blob/main/CHANGELOG.md",
     "rubygems_mfa_required" => "true"
   }
 
@@ -34,10 +34,10 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
+  spec.add_dependency "faraday", "~> 2.12"
+  spec.add_dependency "faraday-retry", "~> 2.2"
+  spec.add_dependency "pastel", "~> 0.8"
   spec.add_dependency "thor", "~> 1.3"
   spec.add_dependency "tty-prompt", "~> 0.23"
   spec.add_dependency "tty-table", "~> 0.12"
-  spec.add_dependency "pastel", "~> 0.8"
-  spec.add_dependency "faraday", "~> 2.12"
-  spec.add_dependency "faraday-retry", "~> 2.2"
 end

@@ -18,7 +18,7 @@ module Taskmate
           if missing.empty?
             ok!("All required directories present")
           else
-            fail!("Missing directories: #{missing.join(", ")}. Run `taskmate init`.")
+            fail!("Missing directories: #{missing.join(', ')}. Run `taskmate init`.")
           end
         end
       end

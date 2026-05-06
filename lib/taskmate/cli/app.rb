@@ -19,7 +19,7 @@ module Taskmate
 
       desc "init", "Initialize a Taskmate workspace in the current directory"
       option :non_interactive, type: :boolean, default: false,
-             desc: "Use defaults without interactive prompts (for CI)"
+                               desc: "Use defaults without interactive prompts (for CI)"
       def init
         Commands::Init.new(options).call(Dir.pwd)
       end
@@ -29,8 +29,8 @@ module Taskmate
         Commands::Doctor.new(options).call(Dir.pwd)
       end
 
-      def self.handle_no_command_error(command, has_namespace = $thor_runner)
-        $stderr.puts "Unknown command: #{command}\n\n"
+      def self.handle_no_command_error(command, _has_namespace = $thor_runner)
+        warn "Unknown command: #{command}\n\n"
         new.invoke(:help)
         exit 1
       end

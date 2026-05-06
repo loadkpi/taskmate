@@ -70,7 +70,7 @@ RSpec.describe Taskmate::Workspace::Initializer do
 
     it "reports skills_copied status" do
       expect(result[:skills_copied]).to be_a(Symbol)
-      expect(%i[copied already_present unavailable]).to include(result[:skills_copied])
+      expect(result[:skills_copied]).to be_in(%i[copied already_present unavailable])
     end
 
     context "when workspace.yml already exists" do
@@ -105,7 +105,7 @@ RSpec.describe Taskmate::Workspace::Initializer do
       end
     end
 
-    context "on second run (--non-interactive)" do
+    context "when run a second time (--non-interactive)" do
       it "reports existing directories and workspace.yml_exists" do
         initializer.call
         second_result = initializer.call

@@ -70,7 +70,7 @@ module Taskmate
         end
 
         def warn_line(msg)
-          $stderr.puts msg
+          warn msg
         end
       end
     end

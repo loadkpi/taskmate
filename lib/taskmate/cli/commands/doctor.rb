@@ -27,7 +27,7 @@ module Taskmate
         private
 
         def render_results(checks)
-          puts "\nTaskmate doctor\n#{"-" * 40}"
+          puts "\nTaskmate doctor\n#{'-' * 40}"
 
           checks.each do |check|
             icon = STATUS_ICONS[check.status]

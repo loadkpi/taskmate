@@ -13,9 +13,7 @@ module Taskmate
 
         def run
           skills_dir = File.join(@workspace_path, "skills")
-          unless Dir.exist?(skills_dir)
-            return fail!("skills/ directory missing. Run `taskmate init`.")
-          end
+          return fail!("skills/ directory missing. Run `taskmate init`.") unless Dir.exist?(skills_dir)
 
           # If gem doesn't bundle skills yet (added in M5-T5), skip gracefully
           builtins_dir = File.join(File.dirname(__FILE__), "..", "..", "skills", "builtins")
@@ -31,7 +29,7 @@ module Taskmate
           if missing.empty?
             ok!("All built-in skills present")
           else
-            fail!("Missing built-in skills: #{missing.join(", ")}. Run `taskmate init` to copy them.")
+            fail!("Missing built-in skills: #{missing.join(', ')}. Run `taskmate init` to copy them.")
           end
         end
       end

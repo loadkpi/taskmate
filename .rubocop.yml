@@ -1,30 +1,69 @@
-require:
+plugins:
   - rubocop-rspec
 
 AllCops:
   TargetRubyVersion: 4.0
   NewCops: enable
+  SuggestExtensions: false
   Exclude:
     - "vendor/**/*"
     - "tmp/**/*"
 
+# String style
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
 Style/FrozenStringLiteralComment:
   Enabled: false
 
+# Internal gem classes don't need yard docs
+Style/Documentation:
+  Enabled: false
+
+# $thor_runner is a Thor internal — suppress
+Style/GlobalVars:
+  Enabled: false
+
 Layout/LineLength:
   Max: 120
 
+# Rendering/orchestration methods naturally have higher complexity
 Metrics/MethodLength:
-  Max: 20
+  Max: 30
+
+Metrics/AbcSize:
+  Max: 30
+
+Metrics/CyclomaticComplexity:
+  Max: 12
+
+Metrics/PerceivedComplexity:
+  Max: 12
 
 Metrics/ClassLength:
   Max: 200
 
+# RSpec
 RSpec/MultipleExpectations:
   Max: 5
 
 RSpec/ExampleLength:
   Max: 20
+
+RSpec/MultipleDescribes:
+  Enabled: false
+
+RSpec/DescribeClass:
+  Enabled: false
+
+RSpec/SpecFilePathFormat:
+  Enabled: false
+
+RSpec/SubjectStub:
+  Enabled: false
+
+RSpec/MessageSpies:
+  Enabled: false
+
+RSpec/ContextWording:
+  Enabled: false

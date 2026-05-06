@@ -17,7 +17,7 @@ RSpec.describe Taskmate::Doctor::Runner do
       checks = runner.run
       failed = checks.select { |c| c.status == :fail }
       expect(failed).to be_empty,
-        "Expected no failures but got: #{failed.map { |c| "#{c.name}: #{c.message}" }.join(", ")}"
+                        "Expected no failures but got: #{failed.map { |c| "#{c.name}: #{c.message}" }.join(', ')}"
     end
 
     it "workspace.yml check passes (ok)" do
@@ -53,7 +53,7 @@ RSpec.describe Taskmate::Doctor::Runner do
     it "built-in skills check is ok or skip (not fail) after init" do
       checks = runner.run
       check = checks.find { |c| c.name == "built-in skills" }
-      expect(%i[ok skip]).to include(check.status)
+      expect(check.status).to be_in(%i[ok skip])
     end
 
     it "Jira check is SKIP" do
@@ -128,9 +128,8 @@ RSpec.describe Taskmate::CLI::Commands::Doctor do
         expect { command.call(workspace) }.to output(/Taskmate doctor/).to_stdout
       end
 
-      it "does not call exit 1 when all checks pass" do
-        expect(command).not_to receive(:exit)
-        command.call(workspace)
+      it "does not raise SystemExit when all checks pass" do
+        expect { command.call(workspace) }.not_to raise_error
       end
     end
 

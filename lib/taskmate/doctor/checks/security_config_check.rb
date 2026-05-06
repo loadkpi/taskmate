@@ -31,9 +31,7 @@ module Taskmate
 
           security = config["security"]
           return fail!("security section missing in workspace.yml") unless security
-          unless security.is_a?(Hash)
-            return fail!("security section must be a mapping, got #{security.class}")
-          end
+          return fail!("security section must be a mapping, got #{security.class}") unless security.is_a?(Hash)
 
           violations = SAFE_DEFAULTS.filter_map do |key, expected|
             "#{key} should be #{expected}" if security[key] != expected
@@ -42,7 +40,7 @@ module Taskmate
           if violations.empty?
             ok!("Security config has safe defaults")
           else
-            fail!("Unsafe security config: #{violations.join("; ")}")
+            fail!("Unsafe security config: #{violations.join('; ')}")
           end
         end
       end

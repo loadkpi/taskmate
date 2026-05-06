@@ -8,7 +8,7 @@ module Taskmate
         SECRET_PATTERNS = [
           /AKIA[0-9A-Z]{16}/,             # AWS access key
           /ghp_[0-9A-Za-z]{36}/,          # GitHub personal token
-          /glpat-[0-9A-Za-z\-]{20}/,      # GitLab token
+          /glpat-[0-9A-Za-z-]{20}/, # GitLab token
           /-----BEGIN [A-Z ]*PRIVATE KEY/, # Private key block
           /Bearer\s+ey[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+/ # JWT
         ].freeze
@@ -23,7 +23,7 @@ module Taskmate
 
           # Include dotfiles (e.g. .env, .netrc) via FNM_DOTMATCH
           all_root_files = Dir.glob(File.join(@workspace_path, "*"), File::FNM_DOTMATCH)
-                             .select { |f| File.file?(f) }
+                              .select { |f| File.file?(f) }
 
           all_root_files.each do |file|
             content = File.read(file, encoding: "utf-8")
@@ -40,7 +40,7 @@ module Taskmate
           if suspicious.empty?
             ok!("No secrets detected in workspace root files")
           else
-            fail!("Possible secrets detected in: #{suspicious.join(", ")}. " \
+            fail!("Possible secrets detected in: #{suspicious.join(', ')}. " \
                   "Add these files to .taskmateignore and rotate any exposed credentials.")
           end
         end
