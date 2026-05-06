@@ -10,6 +10,9 @@ require "taskmate/cli/commands/improve"
 require "taskmate/cli/commands/review"
 require "taskmate/cli/commands/create_task"
 require "taskmate/cli/commands/skills"
+require "taskmate/cli/commands/validate"
+require "taskmate/cli/commands/push"
+require "taskmate/cli/commands/conflict"
 
 module Taskmate
   module CLI
@@ -75,6 +78,31 @@ module Taskmate
       def create_task(description)
         with_error_handling { Commands::CreateTask.new(options).call(description, Dir.pwd) }
       end
+
+      desc "validate KEY", "Validate issue Markdown for Jira compatibility"
+      option :format, type: :string, default: "text", desc: "Output format: text or json"
+      def validate(key)
+        with_error_handling { Commands::Validate.new(options).call(key, Dir.pwd) }
+      end
+
+      desc "push KEY", "Push issue to Jira"
+      option :dry_run, type: :boolean, default: false, desc: "Preview without writing"
+      option :format,  type: :string,  default: "text",  desc: "Output format: text or json"
+      def push(key)
+        with_error_handling { Commands::Push.new(options).call(key, Dir.pwd) }
+      end
+
+      desc "conflict SUBCOMMAND", "Conflict management commands"
+      subcommand "conflict", Class.new(Thor) {
+        desc "show KEY", "Show conflict details for an issue"
+        define_method(:show) do |key|
+          begin
+            Commands::Conflict.new(options).show(key, Dir.pwd)
+          rescue Taskmate::Error => e
+            warn "Error: #{e.message}"; exit 1
+          end
+        end
+      }
 
       desc "skills SUBCOMMAND", "Skill management commands"
       subcommand "skills", Class.new(Thor) {
