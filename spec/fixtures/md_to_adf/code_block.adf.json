@@ -1,0 +1,11 @@
+{
+  "type": "doc",
+  "version": 1,
+  "content": [
+    {
+      "type": "codeBlock",
+      "attrs": { "language": "ruby" },
+      "content": [{ "type": "text", "text": "def hello\n  puts \"Hello\"\nend" }]
+    }
+  ]
+}
