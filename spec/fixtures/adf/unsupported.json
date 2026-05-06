@@ -1,0 +1,18 @@
+{
+  "type": "doc",
+  "version": 1,
+  "content": [
+    {
+      "type": "paragraph",
+      "content": [{ "type": "text", "text": "Before table." }]
+    },
+    {
+      "type": "table",
+      "content": []
+    },
+    {
+      "type": "paragraph",
+      "content": [{ "type": "text", "text": "After table." }]
+    }
+  ]
+}

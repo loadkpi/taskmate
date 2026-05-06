@@ -4,8 +4,6 @@ require "taskmate/doctor/checks/config_reader"
 module Taskmate
   module Doctor
     module Checks
-      # Full online Jira connectivity check is added in M4-T8.
-      # Here we only report skip/configured status based on workspace.yml.
       class JiraCheck < Check
         include ConfigReader
 
@@ -23,11 +21,37 @@ module Taskmate
             return skip!("workspace.yml is malformed — skipping Jira check")
           end
 
-          jira_url = safe_dig(config, "tracker", "base_url")
-          if jira_url.empty?
-            skip!("Jira not configured in workspace.yml (online check added in M4)")
-          else
-            skip!("Jira configured (#{jira_url}) — online connectivity check added in M4")
+          base_url    = ENV.fetch("TASKMATE_JIRA_URL",   safe_dig(config, "jira", "base_url"))
+          email       = ENV.fetch("TASKMATE_JIRA_EMAIL",  "")
+          api_token   = ENV.fetch("TASKMATE_JIRA_TOKEN",  "")
+          project_key = safe_dig(config, "jira", "default_project")
+
+          if base_url.empty?
+            return skip!("Jira not configured in workspace.yml and TASKMATE_JIRA_URL not set")
+          end
+
+          if email.empty? || api_token.empty?
+            return fail!("Authentication failed. Check TASKMATE_JIRA_EMAIL and TASKMATE_JIRA_TOKEN.")
+          end
+
+          begin
+            require "taskmate/jira/client"
+            client = Jira::Client.new(base_url: base_url, email: email, api_token: api_token,
+                                      max_retries: 1)
+            if project_key.empty?
+              # Just verify credentials with a minimal check
+              client.search_issues(jql: "ORDER BY created DESC", limit: 1)
+              ok!("Jira reachable and credentials valid (#{base_url})")
+            else
+              client.get_project(project_key)
+              ok!("Jira reachable; project #{project_key} accessible (#{base_url})")
+            end
+          rescue JiraAuthError => e
+            fail!("Authentication failed. Check TASKMATE_JIRA_EMAIL and TASKMATE_JIRA_TOKEN.")
+          rescue JiraNotFoundError
+            fail!("Project #{project_key} not found on #{base_url}.")
+          rescue => e
+            fail!("Jira unreachable (#{base_url}): #{e.message}")
           end
         end
       end

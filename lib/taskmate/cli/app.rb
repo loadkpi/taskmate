@@ -5,6 +5,7 @@ require "taskmate/cli/commands/doctor"
 require "taskmate/cli/commands/workspace"
 require "taskmate/cli/commands/show"
 require "taskmate/cli/commands/diff"
+require "taskmate/cli/commands/pull"
 
 module Taskmate
   module CLI
@@ -43,6 +44,14 @@ module Taskmate
       option :format, type: :string, default: "text", desc: "Output format: text or json"
       def diff(key)
         with_error_handling { Commands::Diff.new(options).call(key, Dir.pwd) }
+      end
+
+      desc "pull [KEY]", "Pull issue(s) from Jira"
+      option :jql,    type: :string,  desc: "JQL query to pull multiple issues"
+      option :limit,  type: :numeric, default: 50, desc: "Max issues to pull (JQL mode)"
+      option :format, type: :string,  default: "text", desc: "Output format: text or json"
+      def pull(key = nil)
+        with_error_handling { Commands::Pull.new(options).call(key, Dir.pwd) }
       end
 
       desc "workspace SUBCOMMAND", "Workspace commands"
