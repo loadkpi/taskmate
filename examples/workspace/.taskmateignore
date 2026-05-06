@@ -1,0 +1,17 @@
+# Files and directories excluded from AI context
+# Syntax is identical to .gitignore
+
+# Credentials and secrets
+*.key
+*.pem
+*.p12
+secrets.yml
+.env
+.env.*
+
+# Private attachments
+attachments/
+private/
+
+# Do not expose internal architecture docs to AI
+architecture/

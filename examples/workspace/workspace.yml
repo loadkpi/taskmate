@@ -1,0 +1,24 @@
+version: 1
+
+jira:
+  base_url: https://your-org.atlassian.net
+  default_project: DEMO
+  # story_points_field: customfield_10016
+
+ai:
+  provider: disabled   # openai | anthropic | ollama | disabled
+  model: ""
+
+security:
+  require_consent_for_ai: true
+  require_confirm_for_push: true
+  secret_detection: true
+  store_prompts_in_audit: false
+
+push:
+  allowed_fields:
+    - summary
+    - description
+    - labels
+    - components
+    - priority
