@@ -1,6 +1,7 @@
 require "thor"
 require "taskmate/version"
 require "taskmate/cli/commands/init"
+require "taskmate/cli/commands/doctor"
 
 module Taskmate
   module CLI
@@ -21,6 +22,11 @@ module Taskmate
              desc: "Use defaults without interactive prompts (for CI)"
       def init
         Commands::Init.new(options).call(Dir.pwd)
+      end
+
+      desc "doctor", "Run workspace health checks"
+      def doctor
+        Commands::Doctor.new(options).call(Dir.pwd)
       end
 
       def self.handle_no_command_error(command, has_namespace = $thor_runner)
