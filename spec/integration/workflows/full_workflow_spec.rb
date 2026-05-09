@@ -34,10 +34,12 @@ RSpec.describe "Full workflow", type: :integration do
   end
 
   def push_issue(key)
+    push_config = %w[summary description labels components priority].to_h { |f| ["allow_#{f}", true] }
     Taskmate::Core::PushIssue.new(
       workspace_path: workspace,
       jira_client: jira_client,
-      security_policy: fake_policy
+      security_policy: fake_policy,
+      push_config: push_config
     ).call(key)
   end
 

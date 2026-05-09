@@ -53,7 +53,7 @@ RSpec.describe Taskmate::Doctor::Runner do
     it "built-in skills check is ok or skip (not fail) after init" do
       checks = runner.run
       check = checks.find { |c| c.name == "built-in skills" }
-      expect(check.status).to be_in(%i[ok skip])
+      expect(%i[ok skip]).to include(check.status)
     end
 
     it "Jira check is SKIP" do

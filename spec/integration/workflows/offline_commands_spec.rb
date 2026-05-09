@@ -103,10 +103,10 @@ RSpec.describe "Offline commands", type: :integration do
       synced_path = File.join(workspace, "issues", ".jira", "OFFLINE-1.synced.md")
       FileUtils.mkdir_p(File.dirname(synced_path))
 
-      # Write identical synced copy
-      File.write(synced_path, File.read(issue_path))
-
       issue_file = Taskmate::Workspace::IssueFile.read(issue_path)
+      # Write synced copy using the same serialization Diff uses for comparison
+      File.write(synced_path, issue_file.raw_content)
+
       diff = Taskmate::Workspace::Diff.compute(issue_file)
       expect(diff.empty?).to be true
     end

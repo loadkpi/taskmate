@@ -85,7 +85,7 @@ module Taskmate
       end
 
       def highest_level(levels)
-        LEVELS.rfind { |l| levels.include?(l) } || :safe
+        LEVELS.reverse.find { |l| levels.include?(l) } || :safe
       end
     end
   end
