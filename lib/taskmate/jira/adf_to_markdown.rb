@@ -14,7 +14,7 @@ module Taskmate
 
       private
 
-      def render_node(node)
+      def render_node(node) # rubocop:disable Metrics/CyclomaticComplexity
         return "" if node.nil? || node.empty?
 
         case node["type"]

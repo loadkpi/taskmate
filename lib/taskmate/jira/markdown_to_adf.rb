@@ -34,6 +34,7 @@ module Taskmate
           return [Block.new(type: :heading, data: { level: m[1].length, text: m[2] }), idx + 1]
         end
         return [Block.new(type: :rule, data: {}), idx + 1] if line.match?(/^---+$|^\*\*\*+$/)
+
         if line.match?(/^[-*+]\s+/)
           items, new_idx = collect_list(lines, idx, :bullet)
           return [Block.new(type: :bullet_list, data: { items: items }), new_idx]
@@ -43,6 +44,7 @@ module Taskmate
           return [Block.new(type: :ordered_list, data: { items: items }), new_idx]
         end
         return [nil, idx + 1] if line.strip.empty?
+
         parse_paragraph_block(lines, idx)
       end
 
@@ -87,15 +89,20 @@ module Taskmate
         case block.type
         when :heading    then render_heading_block(block)
         when :paragraph  then { "type" => "paragraph", "content" => inline_nodes(block.data[:text]) }
-        when :bullet_list  then { "type" => "bulletList",  "content" => block.data[:items].map { |t| list_item_node(t) } }
-        when :ordered_list then { "type" => "orderedList", "content" => block.data[:items].map { |t| list_item_node(t) } }
+        when :bullet_list then { "type" => "bulletList", "content" => block.data[:items].map do |t|
+          list_item_node(t)
+        end }
+        when :ordered_list then { "type" => "orderedList", "content" => block.data[:items].map do |t|
+          list_item_node(t)
+        end }
         when :code_block then render_code_fence_block(block)
         when :rule       then { "type" => "rule" }
         end
       end
 
       def render_heading_block(block)
-        { "type" => "heading", "attrs" => { "level" => block.data[:level] }, "content" => inline_nodes(block.data[:text]) }
+        { "type" => "heading", "attrs" => { "level" => block.data[:level] },
+          "content" => inline_nodes(block.data[:text]) }
       end
 
       def render_code_fence_block(block)
@@ -126,7 +133,7 @@ module Taskmate
         nodes.empty? ? [{ "type" => "text", "text" => "" }] : nodes
       end
 
-      def match_inline(text, pos) # rubocop:disable Metrics/MethodLength
+      def match_inline(text, pos) # rubocop:disable Metrics/AbcSize
         slice = text[pos..]
         if (m = slice.match(/\A\*\*(.+?)\*\*/))
           [text_node(m[1], [mark("strong")]), m[0].length]
