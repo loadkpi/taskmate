@@ -15,7 +15,7 @@ module Taskmate
         def run
           config = load_workspace_config(@workspace_path)
           case config
-          when :not_found             then return skip!("workspace.yml not found")
+          when :not_found then return skip!("workspace.yml not found")
           when :invalid_yaml, :invalid_structure then return skip!("workspace.yml is malformed — skipping Jira check")
           end
           check_jira_config(config)
@@ -30,18 +30,24 @@ module Taskmate
           project_key = resolve_project_key(config)
 
           return skip!("Jira not configured in workspace.yml and TASKMATE_JIRA_URL not set") if base_url.empty?
-          return fail!("Authentication failed. Check TASKMATE_JIRA_EMAIL and TASKMATE_JIRA_TOKEN.") if email.empty? || api_token.empty?
+          if email.empty? || api_token.empty?
+            return fail!("Authentication failed. Check TASKMATE_JIRA_EMAIL and TASKMATE_JIRA_TOKEN.")
+          end
 
           check_connectivity(base_url, email, api_token, project_key)
         end
 
         def resolve_base_url(config)
           ENV.fetch("TASKMATE_JIRA_URL",
-                    safe_dig(config, "tracker", "base_url").then { |v| v.empty? ? safe_dig(config, "jira", "base_url") : v })
+                    safe_dig(config, "tracker", "base_url").then do |v|
+                      v.empty? ? safe_dig(config, "jira", "base_url") : v
+                    end)
         end
 
         def resolve_project_key(config)
-          safe_dig(config, "tracker", "default_project").then { |v| v.empty? ? safe_dig(config, "jira", "default_project") : v }
+          safe_dig(config, "tracker", "default_project").then do |v|
+            v.empty? ? safe_dig(config, "jira", "default_project") : v
+          end
         end
 
         def check_connectivity(base_url, email, api_token, project_key)

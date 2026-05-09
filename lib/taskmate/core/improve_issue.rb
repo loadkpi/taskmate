@@ -22,7 +22,8 @@ module Taskmate
         raise IssueNotFoundError, "No local file for #{key}." unless File.exist?(issue_path)
 
         issue    = Workspace::IssueFile.read(issue_path)
-        proposed = @skill_runner.run(skill_id: "improve-task", issue_file: issue, instruction: instruction).response_text
+        proposed = @skill_runner.run(skill_id: "improve-task", issue_file: issue,
+                                     instruction: instruction).response_text
         diff     = Workspace::Diff.new(issue_key: key, original: issue.raw_content, modified: proposed)
 
         confirm_and_apply(issue, proposed, diff, output_path || issue_path)

@@ -57,7 +57,7 @@ module Taskmate
         jira_raw    = @jira_client.find_issue(key)
         check_conflict!(key, issue, jira_raw)
 
-        jira_fields              = jira_raw["fields"] || {}
+        jira_fields = jira_raw["fields"] || {}
         payload, action_plan, warnings = build_existing_plan(issue, key, jira_fields)
 
         return dry_run_result(issue, action_plan) if dry_run
@@ -91,7 +91,7 @@ module Taskmate
               "Run `taskmate conflict show #{key}` for details."
       end
 
-      def build_existing_plan(issue, key, jira_fields)
+      def build_existing_plan(issue, _key, jira_fields)
         payload = @payload_builder.build_update(issue, jira_fields: jira_fields)
         field_changes = payload["fields"].map do |field, val|
           Security::ActionGate::FieldChange.new(field: field, from: jira_fields[field].inspect, to: val.inspect)

@@ -30,7 +30,7 @@ GOLDEN_FIXTURE = <<~MD.freeze
 MD
 
 RSpec.describe "Frontmatter round-trip" do
-  it "parses scalar fields from the golden fixture" do # rubocop:disable RSpec/MultipleExpectations
+  it "parses scalar fields from the golden fixture" do
     ff = Taskmate::Workspace::FrontmatterFile.parse(GOLDEN_FIXTURE)
     expect(ff.frontmatter["key"]).to eq("SAR-1")
     expect(ff.frontmatter["summary"]).to eq("Fix the login bug")
@@ -39,7 +39,7 @@ RSpec.describe "Frontmatter round-trip" do
     expect(ff.frontmatter["issue_type"]).to eq("Bug")
   end
 
-  it "parses collection fields and body from the golden fixture" do # rubocop:disable RSpec/MultipleExpectations
+  it "parses collection fields and body from the golden fixture" do
     ff = Taskmate::Workspace::FrontmatterFile.parse(GOLDEN_FIXTURE)
     expect(ff.frontmatter["labels"]).to eq(%w[backend auth])
     expect(ff.frontmatter["jira_source_hash"]).to eq("sha256:aabbcc")
@@ -55,7 +55,7 @@ RSpec.describe "Frontmatter round-trip" do
     expect(ff2.body.strip).to eq(ff1.body.strip)
   end
 
-  it "serialized output contains expected YAML key-value fragments" do # rubocop:disable RSpec/MultipleExpectations
+  it "serialized output contains expected YAML key-value fragments" do
     ff = Taskmate::Workspace::FrontmatterFile.parse(GOLDEN_FIXTURE)
     out = ff.serialize
     expect(out).to start_with("---\n")
@@ -64,7 +64,7 @@ RSpec.describe "Frontmatter round-trip" do
     expect(out).to include("issue_type: Bug")
   end
 
-  it "serialized output has correct structure and body" do # rubocop:disable RSpec/MultipleExpectations
+  it "serialized output has correct structure and body" do
     ff = Taskmate::Workspace::FrontmatterFile.parse(GOLDEN_FIXTURE)
     out = ff.serialize
     # Labels must serialize as a sequence, not inline
