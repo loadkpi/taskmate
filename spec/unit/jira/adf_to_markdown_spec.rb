@@ -5,14 +5,16 @@ require "json"
 RSpec.describe Taskmate::Jira::AdfToMarkdown do
   subject(:converter) { described_class.new }
 
-  FIXTURES_DIR = File.expand_path("../../fixtures/adf", __dir__)
+  def fixtures_dir
+    File.expand_path("../../fixtures/adf", __dir__)
+  end
 
   def adf(name)
-    JSON.parse(File.read(File.join(FIXTURES_DIR, "#{name}.json")))
+    JSON.parse(File.read(File.join(fixtures_dir, "#{name}.json")))
   end
 
   def golden(name)
-    File.read(File.join(FIXTURES_DIR, "#{name}.md"))
+    File.read(File.join(fixtures_dir, "#{name}.md"))
   end
 
   describe "golden file tests" do

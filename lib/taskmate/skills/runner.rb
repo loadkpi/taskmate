@@ -20,9 +20,9 @@ module Taskmate
 
         consent = @security_policy.authorize_ai_call(
           issue_file: issue_file,
-          provider:   @ai_provider.class.name,
-          model:      model,
-          skill:      skill_id
+          provider: @ai_provider.class.name,
+          model: model,
+          _skill: skill_id
         )
 
         raise ConsentDeniedError, "AI call denied for skill #{skill_id}" if consent == :deny
@@ -33,17 +33,17 @@ module Taskmate
         prompt_hash = Security::AuditWriter.prompt_hash(prompt)
 
         @security_policy.write_ai_audit(
-          skill:       skill_id,
-          provider:    @ai_provider.class.name,
-          model:       model.to_s,
+          skill: skill_id,
+          provider: @ai_provider.class.name,
+          model: model.to_s,
           prompt_hash: prompt_hash,
-          issue_key:   issue_file.key
+          issue_key: issue_file.key
         )
 
         RunResult.new(
-          skill_id:    skill_id,
+          skill_id: skill_id,
           response_text: response,
-          prompt_hash:   prompt_hash
+          prompt_hash: prompt_hash
         )
       end
 

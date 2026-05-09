@@ -39,7 +39,7 @@ module Taskmate
           end
 
           # Heading
-          if (m = line.match(/^(#{1,6})\s+(.+)/))
+          if (m = line.match(/^(\#{1,6})\s+(.+)/))
             blocks << Block.new(type: :heading, data: { level: m[1].length, text: m[2] })
             i += 1
             next
@@ -86,7 +86,7 @@ module Taskmate
       end
 
       def block_marker?(line)
-        line.match?(/^#{1,6}\s|^```|^[-*+]\s|^\d+\.\s|^---+$/)
+        line.match?(/^\#{1,6}\s|^```|^[-*+]\s|^\d+\.\s|^---+$/)
       end
 
       def collect_list(lines, i, _kind)

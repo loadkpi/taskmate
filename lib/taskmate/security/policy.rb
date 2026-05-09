@@ -12,7 +12,7 @@ module Taskmate
                      non_interactive: false)
         @workspace_path  = workspace_path
         @non_interactive = non_interactive
-        @redactor  = redactor  || SecretRedactor.new
+        @redactor = redactor || SecretRedactor.new
         @classifier = classifier || DataClassifier.new(
           workspace_path: workspace_path,
           redactor: @redactor
@@ -30,12 +30,10 @@ module Taskmate
 
       # Orchestrates: ignore rules → redact → classify → consent
       # Returns :allow or :deny
-      def authorize_ai_call(issue_file:, provider:, model: nil, skill: nil)
+      def authorize_ai_call(issue_file:, provider:, model: nil, _skill: nil)
         classification = @classifier.classify(issue_file)
 
-        if classification.level == :excluded
-          return :deny
-        end
+        return :deny if classification.level == :excluded
 
         if classification.level == :secret
           warn "Blocked: secrets detected in issue content. Redact before using AI."
@@ -43,10 +41,10 @@ module Taskmate
         end
 
         context = ConsentManager::ConsentContext.new(
-          provider:       provider,
-          model:          model,
-          files:          [issue_file.path].compact,
-          sections:       classification.sections.map { |s| "#{s.name} (#{s.level})" },
+          provider: provider,
+          model: model,
+          files: [issue_file.path].compact,
+          sections: classification.sections.map { |s| "#{s.name} (#{s.level})" },
           excluded_paths: classification.excluded_paths
         )
 
@@ -60,12 +58,12 @@ module Taskmate
       end
 
       # Delegate to AuditWriter
-      def write_action_audit(**kwargs)
-        @audit_writer.write_action_audit(**kwargs)
+      def write_action_audit(**)
+        @audit_writer.write_action_audit(**)
       end
 
-      def write_ai_audit(**kwargs)
-        @audit_writer.write_ai_audit(**kwargs)
+      def write_ai_audit(**)
+        @audit_writer.write_ai_audit(**)
       end
     end
   end

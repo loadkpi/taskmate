@@ -82,14 +82,14 @@ RSpec.describe Taskmate::Workspace::Diff do
     it "merges nearby changes into one hunk when within CONTEXT_LINES" do
       # Changes at line 3 and line 7 in a 10-line file — only 4 apart,
       # well within CONTEXT_LINES=3 reach of each other
-      original = (1..10).map { |i| "line#{i}" }.join("\n") + "\n"
+      original = "#{(1..10).map { |i| "line#{i}" }.join("\n")}\n"
       modified = original.sub("line3", "CHANGED3").sub("line7", "CHANGED7")
       d = build_diff(original: original, modified: modified)
       expect(d.hunks.size).to eq(1)
     end
 
     it "produces separate hunks for far-apart changes" do
-      original = (1..20).map { |i| "line#{i}" }.join("\n") + "\n"
+      original = "#{(1..20).map { |i| "line#{i}" }.join("\n")}\n"
       modified = original.sub("line1", "X").sub("line15", "Y")
       d = build_diff(original: original, modified: modified)
       expect(d.hunks.size).to eq(2)

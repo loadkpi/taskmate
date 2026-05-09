@@ -20,13 +20,11 @@ module Taskmate
           if fmt == "json"
             require "json"
             puts JSON.pretty_generate(skills.map { |s| skill_summary(s) })
+          elsif skills.empty?
+            puts "No skills found in #{workspace_path}/skills/"
           else
-            if skills.empty?
-              puts "No skills found in #{workspace_path}/skills/"
-            else
-              skills.each do |s|
-                puts "  %-30s  v%-6s  %s" % [s.id, s.version.to_s, s.kind.to_s]
-              end
+            skills.each do |s|
+              puts format("  %<id>-30s  v%<version>-6s  %<kind>s", id: s.id, version: s.version.to_s, kind: s.kind.to_s)
             end
           end
         end
@@ -46,9 +44,9 @@ module Taskmate
             puts "description: #{skill.description}"
             puts "requires_ai: #{skill.requires_ai}"
             puts "\nInputs:"
-            skill.inputs.each { |i| puts "  - #{i["name"]} (#{i["type"]})" }
+            skill.inputs.each { |i| puts "  - #{i['name']} (#{i['type']})" }
             puts "\nOutputs:"
-            skill.outputs.each { |o| puts "  - #{o["name"]} (#{o["type"]})" }
+            skill.outputs.each { |o| puts "  - #{o['name']} (#{o['type']})" }
           end
         end
 
@@ -83,8 +81,8 @@ module Taskmate
             require "json"
             puts JSON.pretty_generate(
               "skill_id" => skill_id,
-              "status"   => result.status.to_s,
-              "diff"     => result.diff_text
+              "status" => result.status.to_s,
+              "diff" => result.diff_text
             )
           else
             case result.status
@@ -105,9 +103,9 @@ module Taskmate
         end
 
         def validate_format!
-          unless VALID_FORMATS.include?(fmt)
-            raise Taskmate::ValidationError, "Invalid format '#{fmt}'. Valid: #{VALID_FORMATS.join(", ")}"
-          end
+          return if VALID_FORMATS.include?(fmt)
+
+          raise Taskmate::ValidationError, "Invalid format '#{fmt}'. Valid: #{VALID_FORMATS.join(', ')}"
         end
 
         def skill_summary(skill)
@@ -116,14 +114,14 @@ module Taskmate
 
         def skill_detail(skill)
           {
-            "id"          => skill.id,
-            "version"     => skill.version.to_s,
-            "kind"        => skill.kind,
+            "id" => skill.id,
+            "version" => skill.version.to_s,
+            "kind" => skill.kind,
             "description" => skill.description,
             "requires_ai" => skill.requires_ai,
-            "inputs"      => skill.inputs,
-            "outputs"     => skill.outputs,
-            "security"    => skill.security
+            "inputs" => skill.inputs,
+            "outputs" => skill.outputs,
+            "security" => skill.security
           }
         end
       end

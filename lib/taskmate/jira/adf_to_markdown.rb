@@ -7,7 +7,7 @@ module Taskmate
         @unsupported_nodes = []
         markdown = render_node(adf || {})
         ConversionResult.new(
-          markdown:          markdown,
+          markdown: markdown,
           unsupported_nodes: @unsupported_nodes.uniq
         )
       end
@@ -18,7 +18,7 @@ module Taskmate
         return "" if node.nil? || node.empty?
 
         case node["type"]
-        when "doc"
+        when "doc", "listItem"
           render_children(node, separator: "\n")
         when "paragraph"
           content = render_children(node)
@@ -31,8 +31,6 @@ module Taskmate
           render_list(node, ordered: false)
         when "orderedList"
           render_list(node, ordered: true)
-        when "listItem"
-          render_children(node, separator: "\n")
         when "codeBlock"
           lang = node.dig("attrs", "language") || ""
           code = render_children(node)
@@ -74,7 +72,7 @@ module Taskmate
           rest  = lines.drop(1).map { |l| "   #{l}" }.join
           "#{first}\n#{rest}"
         end
-        items.join("")
+        items.join
       end
 
       def apply_marks(text, marks)
@@ -87,11 +85,10 @@ module Taskmate
             href = mark.dig("attrs", "href") || ""
             "[#{acc}](#{href})"
           when "strike"      then "~~#{acc}~~"
-          when "underline"   then acc  # no Markdown equivalent; keep text
-          when "textColor"   then acc  # no Markdown equivalent; keep text
-          when "subsup"      then acc  # no Markdown equivalent; keep text
+          when "underline", "textColor", "subsup"
+            acc  # no Markdown equivalent; keep text
           else
-            @unsupported_nodes << "mark:#{mark["type"]}"
+            @unsupported_nodes << "mark:#{mark['type']}"
             acc
           end
         end

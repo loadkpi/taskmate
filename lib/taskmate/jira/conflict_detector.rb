@@ -21,25 +21,25 @@ module Taskmate
 
         if stored_jira_hash == current_jira_hash
           ConflictResult.new(
-            status:         :no_conflict,
+            status: :no_conflict,
             changed_fields: [],
-            local_hash:     stored_jira_hash,
-            jira_hash:      current_jira_hash
+            local_hash: stored_jira_hash,
+            jira_hash: current_jira_hash
           )
         else
           changed = find_changed_fields(local_issue, fresh_issue)
           ConflictResult.new(
-            status:         :conflict,
+            status: :conflict,
             changed_fields: changed,
-            local_hash:     stored_jira_hash,
-            jira_hash:      current_jira_hash
+            local_hash: stored_jira_hash,
+            jira_hash: current_jira_hash
           )
         end
       end
 
-      private
-
       TRACKED_FIELDS = %w[summary status priority issue_type labels assignee due_date components story_points].freeze
+
+      private
 
       def find_changed_fields(local_issue, jira_issue)
         changes = TRACKED_FIELDS.filter_map do |field|

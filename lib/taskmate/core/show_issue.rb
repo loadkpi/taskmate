@@ -9,7 +9,7 @@ module Taskmate
         @workspace_path = workspace_path
       end
 
-      def call(key, format: :text, metadata: false)
+      def call(key, format: :text, _metadata: false)
         path = issue_path(key)
         raise IssueNotFoundError, "No local file for #{key}. Run `taskmate pull #{key}` first." unless File.exist?(path)
 

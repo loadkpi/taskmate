@@ -15,7 +15,7 @@ module Taskmate
         @jira_client        = jira_client
         @detector           = Jira::ConflictDetector.new(story_points_field: story_points_field)
         require "taskmate/jira/issue_mapper"
-        @mapper             = Jira::IssueMapper.new(story_points_field: story_points_field)
+        @mapper = Jira::IssueMapper.new(story_points_field: story_points_field)
       end
 
       def call(key)
@@ -27,13 +27,13 @@ module Taskmate
         jira_issue, = @mapper.map(jira_raw)
 
         conflict_result = @detector.detect(
-          local_issue:    local_issue,
+          local_issue: local_issue,
           jira_issue_raw: jira_raw
         )
 
         ConflictShowResult.new(
-          local_issue:     local_issue,
-          jira_issue:      jira_issue,
+          local_issue: local_issue,
+          jira_issue: jira_issue,
           conflict_result: conflict_result
         )
       end
@@ -55,8 +55,7 @@ module Taskmate
         jira_raw    = @jira_client.find_issue(key)
         jira_issue, = @mapper.map(jira_raw)
 
-        issue_path  = File.join(@workspace_path, "issues", "#{key}.md")
-        jira_issue.jira_source_hash = jira_issue.jira_source_hash
+        issue_path = File.join(@workspace_path, "issues", "#{key}.md")
         jira_issue.last_synced_local_hash = jira_issue.jira_source_hash
         jira_issue.write(issue_path)
         issue_path

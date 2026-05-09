@@ -154,6 +154,20 @@ module Taskmate
         FrontmatterFile.serialize(frontmatter, body)
       end
 
+      # StructuredUser for assignee/reporter
+      StructuredUser = Struct.new(:account_id, :display_name, :email, keyword_init: true) do
+        def self.from(data)
+          return nil if data.nil?
+          return new(account_id: nil, display_name: data.to_s, email: nil) unless data.is_a?(Hash)
+
+          new(
+            account_id: data["account_id"],
+            display_name: data["display_name"],
+            email: data["email"]
+          )
+        end
+      end
+
       private
 
       def stringify_keys(obj)
@@ -164,22 +178,6 @@ module Taskmate
           obj.map { |v| stringify_keys(v) }
         else
           obj
-        end
-      end
-
-      public
-
-      # StructuredUser for assignee/reporter
-      StructuredUser = Struct.new(:account_id, :display_name, :email, keyword_init: true) do
-        def self.from(data)
-          return nil if data.nil?
-          return new(account_id: nil, display_name: data.to_s, email: nil) unless data.is_a?(Hash)
-
-          new(
-            account_id:   data["account_id"],
-            display_name: data["display_name"],
-            email:        data["email"]
-          )
         end
       end
     end

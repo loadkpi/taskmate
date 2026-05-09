@@ -3,18 +3,18 @@ require "json"
 require "taskmate/jira/markdown_to_adf"
 
 RSpec.describe "Markdown → ADF golden file tests" do
-  FIXTURES_DIR = File.expand_path("../../fixtures/md_to_adf", __dir__)
-
   subject(:converter) { Taskmate::Jira::MarkdownToAdf.new }
 
+  fixtures_dir = File.expand_path("../../fixtures/md_to_adf", __dir__)
+
   # Discover all .md files in the fixtures directory
-  md_files = Dir[File.join(FIXTURES_DIR, "*.md")].sort
+  md_files = Dir[File.join(fixtures_dir, "*.md")]
 
   md_files.each do |md_path|
-    name     = File.basename(md_path, ".md")
-    adf_path = File.join(FIXTURES_DIR, "#{name}.adf.json")
+    name = File.basename(md_path, ".md")
 
     it "converts #{name}.md to expected ADF" do
+      adf_path = File.join(File.expand_path("../../fixtures/md_to_adf", __dir__), "#{name}.adf.json")
       skip "No golden .adf.json for #{name}" unless File.exist?(adf_path)
 
       markdown = File.read(md_path, encoding: "utf-8")

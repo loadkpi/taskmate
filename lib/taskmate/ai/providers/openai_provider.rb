@@ -8,21 +8,21 @@ module Taskmate
       class OpenAiProvider
         include AiPort
 
-        BASE_URL      = "https://api.openai.com"
-        DEFAULT_MODEL = "gpt-4o"
+        BASE_URL      = "https://api.openai.com".freeze
+        DEFAULT_MODEL = "gpt-4o".freeze
 
         def initialize(model: nil, api_key: nil)
           @model   = model || DEFAULT_MODEL
-          @api_key = api_key || ENV.fetch("TASKMATE_OPENAI_API_KEY") {
+          @api_key = api_key || ENV.fetch("TASKMATE_OPENAI_API_KEY") do
             raise AiAuthError, "OpenAI API key not set. Export TASKMATE_OPENAI_API_KEY."
-          }
+          end
           @conn = build_connection
         end
 
-        def complete(prompt:, skill_id:, model: nil)
+        def complete(prompt:, skill_id:, model: nil) # rubocop:disable Lint/UnusedMethodArgument
           used_model = model || @model
           payload    = {
-            model:    used_model,
+            model: used_model,
             messages: [{ role: "user", content: prompt }]
           }
 

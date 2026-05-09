@@ -11,11 +11,11 @@ module Taskmate
         modified    = issue_file.raw_content
 
         new(
-          issue_key:     issue_file.key,
-          original:      original,
-          modified:      modified,
-          synced_path:   synced_path,
-          issue_path:    issue_file.path
+          issue_key: issue_file.key,
+          original: original,
+          modified: modified,
+          synced_path: synced_path,
+          issue_path: issue_file.path
         )
       end
 
@@ -50,7 +50,7 @@ module Taskmate
 
       def header
         key_label  = @issue_key || "issue"
-        orig_label = @original.nil? ? "/dev/null" : "a/issues/#{key_label}.md"
+        orig_label = @original.nil? ? File::NULL : "a/issues/#{key_label}.md"
         new_label  = "b/issues/#{key_label}.md"
         "--- #{orig_label}\n+++ #{new_label}\n"
       end
@@ -61,9 +61,7 @@ module Taskmate
         orig_lines = (@original || "").each_line.map(&:chomp)
         mod_lines  = @modified.each_line.map(&:chomp)
 
-        if @original.nil?
-          return ["@@ -0,0 +1,#{mod_lines.size} @@"] + mod_lines.map { |l| "+#{l}" }
-        end
+        return ["@@ -0,0 +1,#{mod_lines.size} @@"] + mod_lines.map { |l| "+#{l}" } if @original.nil?
 
         edits = compute_edits(orig_lines, mod_lines)
         group_into_hunks(edits, orig_lines.size, mod_lines.size)
@@ -71,7 +69,7 @@ module Taskmate
 
       # Returns array of [:eq/:del/:ins, orig_idx, mod_idx, line]
       def compute_edits(orig, mod)
-        lcs  = compute_lcs(orig, mod)
+        lcs = compute_lcs(orig, mod)
         edits = []
         oi = mi = li = 0
 
@@ -79,7 +77,9 @@ module Taskmate
           if li < lcs.size && oi < orig.size && orig[oi] == lcs[li] &&
              mi < mod.size && mod[mi] == lcs[li]
             edits << [:eq, oi, mi, orig[oi]]
-            oi += 1; mi += 1; li += 1
+            oi += 1
+            mi += 1
+            li += 1
           elsif mi < mod.size && (li >= lcs.size || mod[mi] != lcs[li])
             edits << [:ins, oi, mi, mod[mi]]
             mi += 1
@@ -91,8 +91,8 @@ module Taskmate
         edits
       end
 
-      def group_into_hunks(edits, orig_total, mod_total)
-        changed_idxs = edits.each_index.select { |i| edits[i][0] != :eq }
+      def group_into_hunks(edits, _orig_total, _mod_total)
+        changed_idxs = edits.each_index.reject { |i| edits[i][0] == :eq }
         return [] if changed_idxs.empty?
 
         # Build contiguous ranges with context
@@ -123,15 +123,23 @@ module Taskmate
         end
       end
 
-      def compute_lcs(a, b)
-        m, n = a.size, b.size
+      def compute_lcs(seq_a, seq_b)
+        m = seq_a.size
+        n = seq_b.size
         dp = Array.new(m + 1) { Array.new(n + 1, 0) }
-        (1..m).each { |i| (1..n).each { |j| dp[i][j] = a[i-1] == b[j-1] ? dp[i-1][j-1] + 1 : [dp[i-1][j], dp[i][j-1]].max } }
+        (1..m).each do |i|
+          (1..n).each do |j|
+            dp[i][j] = seq_a[i - 1] == seq_b[j - 1] ? dp[i - 1][j - 1] + 1 : [dp[i - 1][j], dp[i][j - 1]].max
+          end
+        end
         result = []
-        i, j = m, n
-        while i > 0 && j > 0
-          if a[i-1] == b[j-1] then result.unshift(a[i-1]); i -= 1; j -= 1
-          elsif dp[i-1][j] > dp[i][j-1] then i -= 1
+        i = m
+        j = n
+        while i.positive? && j.positive?
+          if seq_a[i - 1] == seq_b[j - 1] then result.unshift(seq_a[i - 1])
+                                                 i -= 1
+                                                 j -= 1
+          elsif dp[i - 1][j] > dp[i][j - 1] then i -= 1
           else j -= 1
           end
         end

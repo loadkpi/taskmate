@@ -8,8 +8,8 @@ module Taskmate
       class OllamaProvider
         include AiPort
 
-        DEFAULT_BASE_URL = "http://localhost:11434"
-        DEFAULT_MODEL    = "llama3"
+        DEFAULT_BASE_URL = "http://localhost:11434".freeze
+        DEFAULT_MODEL    = "llama3".freeze
 
         def initialize(model: nil, base_url: nil)
           @model    = model || DEFAULT_MODEL
@@ -17,10 +17,10 @@ module Taskmate
           @conn     = build_connection
         end
 
-        def complete(prompt:, skill_id:, model: nil)
+        def complete(prompt:, skill_id:, model: nil) # rubocop:disable Lint/UnusedMethodArgument
           used_model = model || @model
           payload    = {
-            model:  used_model,
+            model: used_model,
             prompt: prompt,
             stream: false
           }
@@ -42,7 +42,7 @@ module Taskmate
           Faraday.new(url: @base_url) do |f|
             f.headers["Content-Type"] = "application/json"
             f.headers["Accept"]       = "application/json"
-            f.options.timeout         = 120  # Ollama can be slow locally
+            f.options.timeout         = 120 # Ollama can be slow locally
             f.adapter Faraday.default_adapter
           end
         end

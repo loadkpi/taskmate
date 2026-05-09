@@ -1,14 +1,14 @@
 require "spec_helper"
 require "taskmate/security/secret_redactor"
 
+SAFE_TEXT = <<~TEXT.freeze
+  Fixed a bug in the login flow. The issue was caused by a missing nil-check
+  in the session cookie handler. Tests were added to verify the fix.
+  See https://example.com/docs for more context.
+TEXT
+
 RSpec.describe Taskmate::Security::SecretRedactor do
   subject(:redactor) { described_class.new }
-
-  SAFE_TEXT = <<~TEXT
-    Fixed a bug in the login flow. The issue was caused by a missing nil-check
-    in the session cookie handler. Tests were added to verify the fix.
-    See https://example.com/docs for more context.
-  TEXT
 
   describe "#secrets_found?" do
     context "with safe text" do
@@ -166,17 +166,19 @@ RSpec.describe Taskmate::Security::SecretRedactor do
   end
 
   describe "false positive rate" do
-    TYPICAL_ISSUE_BODIES = [
-      "The button is misaligned on mobile. CSS fix needed.",
-      "After the migration, users see a 500 error. Stack trace attached.",
-      "API endpoint returns 401 when token is missing. Expected 403.",
-      "Update the README with setup instructions and example commands.",
-      "Refactor the auth module to use a service pattern instead of helpers."
-    ].freeze
+    let(:typical_issue_bodies) do
+      [
+        "The button is misaligned on mobile. CSS fix needed.",
+        "After the migration, users see a 500 error. Stack trace attached.",
+        "API endpoint returns 401 when token is missing. Expected 403.",
+        "Update the README with setup instructions and example commands.",
+        "Refactor the auth module to use a service pattern instead of helpers."
+      ]
+    end
 
     it "has no false positives on typical issue descriptions" do
-      false_positives = TYPICAL_ISSUE_BODIES.count { |body| redactor.secrets_found?(body) }
-      rate = false_positives.to_f / TYPICAL_ISSUE_BODIES.size
+      false_positives = typical_issue_bodies.count { |body| redactor.secrets_found?(body) }
+      rate = false_positives.to_f / typical_issue_bodies.size
       expect(rate).to be < 0.05
     end
   end

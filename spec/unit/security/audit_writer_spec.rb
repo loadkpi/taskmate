@@ -11,11 +11,11 @@ RSpec.describe Taskmate::Security::AuditWriter do
   describe "#write_action_audit" do
     let(:path) do
       writer.write_action_audit(
-        fields_changed: ["status", "priority"],
+        fields_changed: %w[status priority],
         user_confirmed: true,
-        dry_run:        false,
-        issue_key:      "SAR-1",
-        warnings:       ["read-only field skipped"]
+        dry_run: false,
+        issue_key: "SAR-1",
+        warnings: ["read-only field skipped"]
       )
     end
 
@@ -30,14 +30,14 @@ RSpec.describe Taskmate::Security::AuditWriter do
     end
 
     it "writes valid YAML" do
-      data = YAML.safe_load(File.read(path))
+      data = YAML.safe_load_file(path)
       expect(data).to be_a(Hash)
     end
 
     it "includes expected fields in YAML" do
-      data = YAML.safe_load(File.read(path))
+      data = YAML.safe_load_file(path)
       expect(data["type"]).to eq("action_audit")
-      expect(data["fields_changed"]).to eq(["status", "priority"])
+      expect(data["fields_changed"]).to eq(%w[status priority])
       expect(data["user_confirmed"]).to be(true)
       expect(data["dry_run"]).to be(false)
       expect(data["issue_key"]).to eq("SAR-1")
@@ -55,11 +55,11 @@ RSpec.describe Taskmate::Security::AuditWriter do
   describe "#write_ai_audit" do
     let(:path) do
       writer.write_ai_audit(
-        skill:       "suggest_fix",
-        provider:    "openai",
-        model:       "gpt-4o",
+        skill: "suggest_fix",
+        provider: "openai",
+        model: "gpt-4o",
         prompt_hash: "sha256:abc123",
-        issue_key:   "SAR-2"
+        issue_key: "SAR-2"
       )
     end
 
@@ -74,7 +74,7 @@ RSpec.describe Taskmate::Security::AuditWriter do
     end
 
     it "includes expected fields in YAML" do
-      data = YAML.safe_load(File.read(path))
+      data = YAML.safe_load_file(path)
       expect(data["type"]).to eq("ai_call_audit")
       expect(data["skill"]).to eq("suggest_fix")
       expect(data["provider"]).to eq("openai")
@@ -84,7 +84,7 @@ RSpec.describe Taskmate::Security::AuditWriter do
     end
 
     it "does not store raw prompt text" do
-      data = YAML.safe_load(File.read(path))
+      data = YAML.safe_load_file(path)
       expect(data.keys).not_to include("prompt")
     end
   end
@@ -96,7 +96,9 @@ RSpec.describe Taskmate::Security::AuditWriter do
     end
 
     it "is deterministic for the same input" do
-      expect(described_class.prompt_hash("x")).to eq(described_class.prompt_hash("x"))
+      hash1 = described_class.prompt_hash("x")
+      hash2 = described_class.prompt_hash("x")
+      expect(hash1).to eq(hash2)
     end
 
     it "differs for different inputs" do

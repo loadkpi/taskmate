@@ -8,25 +8,25 @@ module Taskmate
       class AnthropicProvider
         include AiPort
 
-        BASE_URL      = "https://api.anthropic.com"
-        API_VERSION   = "2023-06-01"
-        DEFAULT_MODEL = "claude-sonnet-4-6"
+        BASE_URL      = "https://api.anthropic.com".freeze
+        API_VERSION   = "2023-06-01".freeze
+        DEFAULT_MODEL = "claude-sonnet-4-6".freeze
         MAX_TOKENS    = 4096
 
         def initialize(model: nil, api_key: nil)
           @model   = model || DEFAULT_MODEL
-          @api_key = api_key || ENV.fetch("TASKMATE_ANTHROPIC_API_KEY") {
+          @api_key = api_key || ENV.fetch("TASKMATE_ANTHROPIC_API_KEY") do
             raise AiAuthError, "Anthropic API key not set. Export TASKMATE_ANTHROPIC_API_KEY."
-          }
+          end
           @conn = build_connection
         end
 
-        def complete(prompt:, skill_id:, model: nil)
+        def complete(prompt:, skill_id:, model: nil) # rubocop:disable Lint/UnusedMethodArgument
           used_model = model || @model
           payload    = {
-            model:      used_model,
+            model: used_model,
             max_tokens: MAX_TOKENS,
-            messages:   [{ role: "user", content: prompt }]
+            messages: [{ role: "user", content: prompt }]
           }
 
           response = @conn.post("/v1/messages") do |req|
@@ -42,7 +42,7 @@ module Taskmate
 
         def build_connection
           Faraday.new(url: BASE_URL) do |f|
-            f.headers["x-api-key"]         = @api_key
+            f.headers["x-api-key"] = @api_key
             f.headers["anthropic-version"]  = API_VERSION
             f.headers["Content-Type"]       = "application/json"
             f.headers["Accept"]             = "application/json"

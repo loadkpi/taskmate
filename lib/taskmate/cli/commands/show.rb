@@ -13,12 +13,12 @@ module Taskmate
         def call(key, workspace_path = Dir.pwd)
           fmt_str = @options[:format].to_s
           unless VALID_FORMATS.include?(fmt_str)
-            raise Taskmate::ValidationError, "Invalid format '#{fmt_str}'. Valid options: #{VALID_FORMATS.join(", ")}"
+            raise Taskmate::ValidationError, "Invalid format '#{fmt_str}'. Valid options: #{VALID_FORMATS.join(', ')}"
           end
 
           format   = fmt_str.to_sym
           metadata = @options[:metadata] || false
-          result   = Core::ShowIssue.new(workspace_path: workspace_path).call(key, format: format, metadata: metadata)
+          result   = Core::ShowIssue.new(workspace_path: workspace_path).call(key, format: format, _metadata: metadata)
           render(result, metadata)
         end
 
@@ -35,10 +35,10 @@ module Taskmate
         end
 
         def render_text(issue, metadata)
-          puts "#{issue.key || "(new)"}  #{issue.summary}"
+          puts "#{issue.key || '(new)'}  #{issue.summary}"
           puts "Status: #{issue.status}  Priority: #{issue.priority}  Type: #{issue.issue_type}"
-          puts "Assignee: #{issue.assignee&.display_name || "(unassigned)"}"
-          puts "Labels: #{issue.labels.join(", ")}" if issue.labels.any?
+          puts "Assignee: #{issue.assignee&.display_name || '(unassigned)'}"
+          puts "Labels: #{issue.labels.join(', ')}" if issue.labels.any?
           puts ""
           puts issue.body
 
@@ -51,21 +51,21 @@ module Taskmate
         def render_json(issue, metadata)
           require "json"
           data = if metadata
-            issue.frontmatter.merge(
-              "body"     => issue.body,
-              "assignee" => serialize_assignee(issue.assignee)
-            )
-          else
-            {
-              "key"      => issue.key,
-              "summary"  => issue.summary,
-              "status"   => issue.status,
-              "priority" => issue.priority,
-              "assignee" => serialize_assignee(issue.assignee),
-              "labels"   => issue.labels,
-              "body"     => issue.body
-            }
-          end
+                   issue.frontmatter.merge(
+                     "body" => issue.body,
+                     "assignee" => serialize_assignee(issue.assignee)
+                   )
+                 else
+                   {
+                     "key" => issue.key,
+                     "summary" => issue.summary,
+                     "status" => issue.status,
+                     "priority" => issue.priority,
+                     "assignee" => serialize_assignee(issue.assignee),
+                     "labels" => issue.labels,
+                     "body" => issue.body
+                   }
+                 end
           puts JSON.pretty_generate(data)
         end
 

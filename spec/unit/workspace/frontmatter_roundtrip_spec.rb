@@ -1,34 +1,35 @@
 require "spec_helper"
 require "taskmate/workspace/frontmatter_file"
 
+GOLDEN_FIXTURE = <<~MD.freeze
+  ---
+  key: SAR-1
+  summary: Fix the login bug
+  status: In Progress
+  priority: High
+  issue_type: Bug
+  labels:
+  - backend
+  - auth
+  assignee:
+    account_id: abc123
+    display_name: Alice
+    email: alice@example.com
+  jira_source_hash: sha256:aabbcc
+  last_synced_local_hash: sha256:ddeeff
+  ---
+  ## Description
+
+  The login button stops working after session timeout.
+
+  ## Steps to reproduce
+
+  1. Log in
+  2. Wait 30 minutes
+  3. Click login again
+MD
+
 RSpec.describe "Frontmatter round-trip" do
-  GOLDEN_FIXTURE = <<~MD
-    ---
-    key: SAR-1
-    summary: Fix the login bug
-    status: In Progress
-    priority: High
-    issue_type: Bug
-    labels:
-    - backend
-    - auth
-    assignee:
-      account_id: abc123
-      display_name: Alice
-      email: alice@example.com
-    jira_source_hash: sha256:aabbcc
-    last_synced_local_hash: sha256:ddeeff
-    ---
-    ## Description
-
-    The login button stops working after session timeout.
-
-    ## Steps to reproduce
-
-    1. Log in
-    2. Wait 30 minutes
-    3. Click login again
-  MD
 
   it "parses all fields from the golden fixture" do
     ff = Taskmate::Workspace::FrontmatterFile.parse(GOLDEN_FIXTURE)
