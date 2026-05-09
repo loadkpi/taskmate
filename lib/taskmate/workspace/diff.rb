@@ -68,7 +68,7 @@ module Taskmate
       end
 
       # Returns array of [:eq/:del/:ins, orig_idx, mod_idx, line]
-      def compute_edits(orig, mod)
+      def compute_edits(orig, mod) # rubocop:disable Metrics/AbcSize
         lcs = compute_lcs(orig, mod)
         edits = []
         oi = mi = li = 0
@@ -91,7 +91,7 @@ module Taskmate
         edits
       end
 
-      def group_into_hunks(edits, _orig_total, _mod_total)
+      def group_into_hunks(edits, _orig_total, _mod_total) # rubocop:disable Metrics/AbcSize, Metrics/PerceivedComplexity
         changed_idxs = edits.each_index.reject { |i| edits[i][0] == :eq }
         return [] if changed_idxs.empty?
 
@@ -123,7 +123,7 @@ module Taskmate
         end
       end
 
-      def compute_lcs(seq_a, seq_b)
+      def compute_lcs(seq_a, seq_b) # rubocop:disable Metrics/AbcSize
         m = seq_a.size
         n = seq_b.size
         dp = Array.new(m + 1) { Array.new(n + 1, 0) }
@@ -137,8 +137,8 @@ module Taskmate
         j = n
         while i.positive? && j.positive?
           if seq_a[i - 1] == seq_b[j - 1] then result.unshift(seq_a[i - 1])
-                                                 i -= 1
-                                                 j -= 1
+                                               i -= 1
+                                               j -= 1
           elsif dp[i - 1][j] > dp[i][j - 1] then i -= 1
           else j -= 1
           end

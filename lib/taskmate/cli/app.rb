@@ -1,5 +1,6 @@
 require "thor"
 require "taskmate/version"
+require "taskmate/cli/error_handling"
 require "taskmate/cli/commands/init"
 require "taskmate/cli/commands/doctor"
 require "taskmate/cli/commands/workspace"
@@ -17,6 +18,8 @@ require "taskmate/cli/commands/conflict"
 module Taskmate
   module CLI
     class App < Thor
+      include ErrorHandling
+
       def self.exit_on_failure?
         true
       end
@@ -88,86 +91,58 @@ module Taskmate
 
       desc "push KEY", "Push issue to Jira"
       option :dry_run, type: :boolean, default: false, desc: "Preview without writing"
-      option :format,  type: :string,  default: "text",  desc: "Output format: text or json"
+      option :format,  type: :string,  default: "text", desc: "Output format: text or json"
       def push(key)
         with_error_handling { Commands::Push.new(options).call(key, Dir.pwd) }
       end
 
       desc "conflict SUBCOMMAND", "Conflict management commands"
       subcommand "conflict", Class.new(Thor) {
+        include Taskmate::CLI::ErrorHandling
+
         desc "show KEY", "Show conflict details for an issue"
         define_method(:show) do |key|
-          begin
-            Commands::Conflict.new(options).show(key, Dir.pwd)
-          rescue Taskmate::Error => e
-            warn "Error: #{e.message}"; exit 1
-          end
+          with_taskmate_errors { Commands::Conflict.new(options).show(key, Dir.pwd) }
         end
       }
 
       desc "skills SUBCOMMAND", "Skill management commands"
       subcommand "skills", Class.new(Thor) {
+        include Taskmate::CLI::ErrorHandling
+
         desc "list", "List all skills"
         option :format, type: :string, default: "text"
         define_method(:list) do
-          begin
-            Commands::Skills.new(options).list(Dir.pwd)
-          rescue Taskmate::Error => e
-            warn "Error: #{e.message}"; exit 1
-          end
+          with_taskmate_errors { Commands::Skills.new(options).list(Dir.pwd) }
         end
 
         desc "show ID", "Show skill details"
         option :format, type: :string, default: "text"
         define_method(:show) do |id|
-          begin
-            Commands::Skills.new(options).show(id, Dir.pwd)
-          rescue Taskmate::Error => e
-            warn "Error: #{e.message}"; exit 1
-          end
+          with_taskmate_errors { Commands::Skills.new(options).show(id, Dir.pwd) }
         end
 
         desc "validate", "Validate all skills"
         option :format, type: :string, default: "text"
         define_method(:validate) do
-          begin
-            Commands::Skills.new(options).validate(Dir.pwd)
-          rescue Taskmate::Error => e
-            warn "Error: #{e.message}"; exit 1
-          end
+          with_taskmate_errors { Commands::Skills.new(options).validate(Dir.pwd) }
         end
 
         desc "diff ID", "Diff skill against built-in version"
         option :format, type: :string, default: "text"
         define_method(:diff) do |id|
-          begin
-            Commands::Skills.new(options).diff(id, Dir.pwd)
-          rescue Taskmate::Error => e
-            warn "Error: #{e.message}"; exit 1
-          end
+          with_taskmate_errors { Commands::Skills.new(options).diff(id, Dir.pwd) }
         end
       }
 
       desc "workspace SUBCOMMAND", "Workspace commands"
       subcommand "workspace", Class.new(Thor) {
+        include Taskmate::CLI::ErrorHandling
+
         desc "status", "Show sync status of all local issues"
         option :format, type: :string, default: "text", desc: "Output format: text or json"
         define_method(:status) do
-          begin
-            Commands::Workspace.new(options).status(Dir.pwd)
-          rescue Taskmate::IssueNotFoundError => e
-            warn "Error: #{e.message}"; exit 1
-          rescue Taskmate::ConsentDeniedError
-            exit 0
-          rescue Taskmate::ConflictError => e
-            warn "Conflict: #{e.message}"; exit 3
-          rescue Taskmate::ValidationError => e
-            warn "Validation error: #{e.message}"; exit 2
-          rescue Taskmate::JiraAuthError => e
-            warn "Authentication failed: #{e.message}\nCheck TASKMATE_JIRA_EMAIL and TASKMATE_JIRA_TOKEN."; exit 4
-          rescue Taskmate::Error => e
-            warn "Error: #{e.message}"; exit 1
-          end
+          with_taskmate_errors { Commands::Workspace.new(options).status(Dir.pwd) }
         end
       }
 
@@ -179,26 +154,8 @@ module Taskmate
 
       private
 
-      def with_error_handling
-        yield
-      rescue Taskmate::IssueNotFoundError => e
-        warn "Error: #{e.message}"
-        exit 1
-      rescue Taskmate::ConsentDeniedError
-        # User cancelled — normal flow
-        exit 0
-      rescue Taskmate::ConflictError => e
-        warn "Conflict: #{e.message}"
-        exit 3
-      rescue Taskmate::ValidationError => e
-        warn "Validation error: #{e.message}"
-        exit 2
-      rescue Taskmate::JiraAuthError => e
-        warn "Authentication failed: #{e.message}\nCheck TASKMATE_JIRA_EMAIL and TASKMATE_JIRA_TOKEN."
-        exit 4
-      rescue Taskmate::Error => e
-        warn "Error: #{e.message}"
-        exit 1
+      def with_error_handling(&)
+        with_taskmate_errors(&)
       end
     end
   end

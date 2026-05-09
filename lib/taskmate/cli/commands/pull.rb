@@ -15,7 +15,7 @@ module Taskmate
         def call(key = nil, workspace_path = Dir.pwd)
           fmt_str = @options[:format].to_s
           unless VALID_FORMATS.include?(fmt_str)
-            raise Taskmate::ValidationError, "Invalid format '#{fmt_str}'. Valid: #{VALID_FORMATS.join(", ")}"
+            raise Taskmate::ValidationError, "Invalid format '#{fmt_str}'. Valid: #{VALID_FORMATS.join(', ')}"
           end
 
           jql   = @options[:jql]
@@ -38,7 +38,7 @@ module Taskmate
           result = CLI::Output.with_spinner("Pulling #{key} from Jira") do
             Core::PullIssue.new(
               workspace_path: workspace_path,
-              jira_client:    client
+              jira_client: client
             ).call(key)
           end
 
@@ -53,7 +53,7 @@ module Taskmate
           batch = CLI::Output.with_spinner("Pulling issues via JQL") do
             Core::PullByJql.new(
               workspace_path: workspace_path,
-              jira_client:    client
+              jira_client: client
             ).call(jql: jql, limit: limit)
           end
 
@@ -68,20 +68,20 @@ module Taskmate
 
         def render_single_text(result)
           CLI::Output.success("Pulled #{result.issue_file.key} → #{result.path}")
-          if result.unsupported_nodes.any?
-            CLI::Output.warn("  Warning: unsupported ADF nodes: #{result.unsupported_nodes.join(", ")}")
-            CLI::Output.warn("  ADF backup saved to #{result.adf_backup_path}")
-          end
+          return unless result.unsupported_nodes.any?
+
+          CLI::Output.warn("  Warning: unsupported ADF nodes: #{result.unsupported_nodes.join(', ')}")
+          CLI::Output.warn("  ADF backup saved to #{result.adf_backup_path}")
         end
 
         def render_single_json(result)
           require "json"
           puts JSON.pretty_generate(
-            "key"              => result.issue_file.key,
-            "path"             => result.path,
-            "synced_path"      => result.synced_path,
+            "key" => result.issue_file.key,
+            "path" => result.path,
+            "synced_path" => result.synced_path,
             "unsupported_nodes" => result.unsupported_nodes,
-            "adf_backup_path"  => result.adf_backup_path
+            "adf_backup_path" => result.adf_backup_path
           )
         end
 
@@ -93,7 +93,7 @@ module Taskmate
         def render_batch_json(batch)
           require "json"
           puts JSON.pretty_generate(
-            "total"  => batch.total,
+            "total" => batch.total,
             "pulled" => batch.pulled.map { |r| { "key" => r.issue_file.key, "path" => r.path } },
             "failed" => batch.failed.map { |f| { "key" => f.key, "error" => f.error } }
           )
@@ -106,12 +106,15 @@ module Taskmate
 
           config   = load_workspace_config(workspace_path)
           base_url = ENV.fetch("TASKMATE_JIRA_URL",
-                               config.is_a?(Hash) ? config.dig("jira", "base_url").to_s : "")
+                               config.is_a?(Hash) ? (config.dig("tracker",
+                                                                "base_url") || config.dig("jira",
+                                                                                          "base_url")).to_s : "")
           email    = ENV.fetch("TASKMATE_JIRA_EMAIL", "")
           token    = ENV.fetch("TASKMATE_JIRA_TOKEN", "")
 
           if base_url.empty? || email.empty? || token.empty?
-            raise Taskmate::JiraAuthError, "Missing Jira credentials. Set TASKMATE_JIRA_URL, TASKMATE_JIRA_EMAIL, TASKMATE_JIRA_TOKEN."
+            raise Taskmate::JiraAuthError,
+                  "Missing Jira credentials. Set TASKMATE_JIRA_URL, TASKMATE_JIRA_EMAIL, TASKMATE_JIRA_TOKEN."
           end
 
           Jira::Client.new(base_url: base_url, email: email, api_token: token)

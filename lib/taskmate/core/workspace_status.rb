@@ -31,7 +31,7 @@ module Taskmate
       private
 
       def scan_issues(clean, local_changed)
-        Dir.glob(File.join(@workspace_path, "issues", "*.md")).sort.each do |path|
+        Dir.glob(File.join(@workspace_path, "issues", "*.md")).each do |path|
           issue = Workspace::IssueFile.read(path)
           state = Workspace::SyncState.compute(issue_file: issue)
 
@@ -45,7 +45,7 @@ module Taskmate
       end
 
       def scan_new_issues(new_local, clean, local_changed)
-        Dir.glob(File.join(@workspace_path, "issues", "new", "*.md")).sort.each do |path|
+        Dir.glob(File.join(@workspace_path, "issues", "new", "*.md")).each do |path|
           issue = Workspace::IssueFile.read(path)
           if issue.new_local?
             new_local << issue
@@ -65,7 +65,7 @@ module Taskmate
 
       def scan_conflict_files(conflict_files)
         pattern = File.join(@workspace_path, "issues", "conflicts", "*.md")
-        Dir.glob(pattern).sort.each do |path|
+        Dir.glob(pattern).each do |path|
           conflict_files << path
         end
       end

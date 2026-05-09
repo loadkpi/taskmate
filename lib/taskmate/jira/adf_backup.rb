@@ -11,7 +11,7 @@ module Taskmate
       def self.save(key:, adf:, workspace_path:, unsupported_nodes: [])
         return nil if unsupported_nodes.empty?
 
-        dir  = File.join(workspace_path, "issues", ".jira")
+        dir = File.join(workspace_path, "issues", ".jira")
         FileUtils.mkdir_p(dir)
 
         path = File.join(dir, "#{key}.description.adf.json")

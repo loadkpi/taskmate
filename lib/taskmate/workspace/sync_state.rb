@@ -20,12 +20,10 @@ module Taskmate
           else
             :local_changed
           end
+        elsif jira_hash && jira_hash != jira_source
+          :jira_changed
         else
-          if jira_hash && jira_hash != jira_source
-            :jira_changed
-          else
-            :clean
-          end
+          :clean
         end
       end
     end

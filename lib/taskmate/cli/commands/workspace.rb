@@ -14,7 +14,7 @@ module Taskmate
           fmt = @options[:format].to_s
           fmt = "text" if fmt.empty?
           unless VALID_FORMATS.include?(fmt)
-            raise Taskmate::ValidationError, "Invalid format '#{fmt}'. Valid: #{VALID_FORMATS.join(", ")}"
+            raise Taskmate::ValidationError, "Invalid format '#{fmt}'. Valid: #{VALID_FORMATS.join(', ')}"
           end
 
           result = Core::WorkspaceStatus.new(workspace_path: workspace_path).call
@@ -38,18 +38,18 @@ module Taskmate
           print_section("New local (#{result.new_local.size})", result.new_local, "+")
           print_section("Clean (#{result.clean.size})", result.clean, " ")
 
-          if result.conflict_files.any?
-            puts "\nUnresolved conflict files (#{result.conflict_files.size}):"
-            result.conflict_files.each { |f| puts "  ! #{File.basename(f)}" }
-          end
+          return unless result.conflict_files.any?
+
+          puts "\nUnresolved conflict files (#{result.conflict_files.size}):"
+          result.conflict_files.each { |f| puts "  ! #{File.basename(f)}" }
         end
 
         def render_status_json(result)
           require "json"
           puts JSON.pretty_generate(
-            "local_changed"  => result.local_changed.map { |i| issue_summary(i) },
-            "new_local"      => result.new_local.map { |i| issue_summary(i) },
-            "clean"          => result.clean.map { |i| issue_summary(i) },
+            "local_changed" => result.local_changed.map { |i| issue_summary(i) },
+            "new_local" => result.new_local.map { |i| issue_summary(i) },
+            "clean" => result.clean.map { |i| issue_summary(i) },
             "conflict_files" => result.conflict_files.map { |f| File.basename(f) }
           )
         end

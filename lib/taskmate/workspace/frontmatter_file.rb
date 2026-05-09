@@ -4,7 +4,7 @@ require "date"
 module Taskmate
   module Workspace
     class FrontmatterFile
-      DELIMITER = "---"
+      DELIMITER = "---".freeze
       FRONTMATTER_REGEX = /\A---\r?\n(.*?)\r?\n---\r?\n?(.*)\z/m
 
       attr_reader :frontmatter, :body, :raw_content

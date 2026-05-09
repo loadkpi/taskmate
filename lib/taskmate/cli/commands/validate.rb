@@ -13,7 +13,7 @@ module Taskmate
         def call(key, workspace_path = Dir.pwd)
           fmt = @options[:format].to_s
           unless VALID_FORMATS.include?(fmt)
-            raise Taskmate::ValidationError, "Invalid format '#{fmt}'. Valid: #{VALID_FORMATS.join(", ")}"
+            raise Taskmate::ValidationError, "Invalid format '#{fmt}'. Valid: #{VALID_FORMATS.join(', ')}"
           end
 
           result = Core::ValidateIssue.new(workspace_path: workspace_path).call(key)
@@ -43,8 +43,8 @@ module Taskmate
         def render_json(result)
           require "json"
           puts JSON.pretty_generate(
-            "key"    => result.issue_file.key,
-            "valid"  => result.valid?,
+            "key" => result.issue_file.key,
+            "valid" => result.valid?,
             "errors" => result.errors.map { |e|
               { "feature" => e.feature, "line" => e.line_number, "message" => e.message }
             }

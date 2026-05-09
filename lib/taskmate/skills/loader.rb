@@ -39,19 +39,19 @@ module Taskmate
 
         fm = ff.frontmatter
         Skill.new(
-          id:              fm["id"],
-          version:         fm["version"],
-          kind:            fm["kind"],
-          description:     fm["description"],
-          requires_ai:     fm.fetch("requires_ai", true),
-          inputs:          Array(fm["inputs"]),
-          outputs:         Array(fm["outputs"]),
-          security:        fm["security"] || {},
-          source:          fm["source"],
+          id: fm["id"],
+          version: fm["version"],
+          kind: fm["kind"],
+          description: fm["description"],
+          requires_ai: fm.fetch("requires_ai", true),
+          inputs: Array(fm["inputs"]),
+          outputs: Array(fm["outputs"]),
+          security: fm["security"] || {},
+          source: fm["source"],
           builtin_version: fm["builtin_version"],
-          source_hash:     fm["source_hash"],
-          prompt_body:     ff.body.strip,
-          path:            path
+          source_hash: fm["source_hash"],
+          prompt_body: ff.body.strip,
+          path: path
         )
       end
     end

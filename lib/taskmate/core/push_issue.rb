@@ -23,7 +23,7 @@ module Taskmate
         @jira_client        = jira_client
         @security_policy    = security_policy
         @payload_builder    = Jira::PayloadBuilder.new(
-          push_config:        push_config,
+          push_config: push_config,
           story_points_field: story_points_field
         )
         @conflict_detector  = Jira::ConflictDetector.new(story_points_field: story_points_field)
@@ -53,54 +53,58 @@ module Taskmate
       end
 
       def push_existing(issue, dry_run:)
-        key     = issue.key
-        jira_raw = @jira_client.find_issue(key)
+        key         = issue.key
+        jira_raw    = @jira_client.find_issue(key)
+        check_conflict!(key, issue, jira_raw)
 
-        # Conflict check
-        conflict = @conflict_detector.detect(
-          local_issue:    issue,
-          jira_issue_raw: jira_raw
-        )
+        jira_fields              = jira_raw["fields"] || {}
+        payload, action_plan, warnings = build_existing_plan(issue, key, jira_fields)
 
-        if conflict.status == :conflict
-          raise ConflictError,
-                "#{key} has conflicting changes on Jira " \
-                "(fields: #{conflict.changed_fields.join(", ")}). " \
-                "Run `taskmate conflict show #{key}` for details."
-        end
+        return dry_run_result(issue, action_plan) if dry_run
+        return deny_result(issue, action_plan) if @security_policy.authorize_jira_write(action_plan) == :deny
 
-        jira_fields = jira_raw["fields"] || {}
-        payload = @payload_builder.build_update(issue, jira_fields: jira_fields)
+        apply_existing_push(issue, key, payload, warnings, action_plan)
+      end
 
-        field_changes = payload["fields"].map do |field, val|
-          Security::ActionGate::FieldChange.new(
-            field: field,
-            from:  jira_fields[field].inspect,
-            to:    val.inspect
-          )
-        end
-
-        warnings = detect_read_only_warnings(issue, jira_fields)
-
+      def push_new(issue, dry_run:)
+        payload     = @payload_builder.build_create(issue)
         action_plan = Security::ActionGate::ActionPlan.build(
-          field_changes: field_changes,
-          warnings:      warnings
+          field_changes: [
+            Security::ActionGate::FieldChange.new(field: "action", from: nil, to: "create new Jira issue")
+          ],
+          warnings: []
         )
 
-        return PushResult.new(
-          issue_file:  issue,
-          applied:     false,
-          dry_run:     true,
-          action_plan: action_plan
-        ) if dry_run
+        return dry_run_result(issue, action_plan) if dry_run
+        return deny_result(issue, action_plan) if @security_policy.authorize_jira_write(action_plan) == :deny
 
-        decision = @security_policy.authorize_jira_write(action_plan)
-        return PushResult.new(issue_file: issue, applied: false, dry_run: false, action_plan: action_plan) if decision == :deny
+        apply_new_push(issue, payload, action_plan)
+      end
 
+      def check_conflict!(key, issue, jira_raw)
+        conflict = @conflict_detector.detect(local_issue: issue, jira_issue_raw: jira_raw)
+        return unless conflict.status == :conflict
+
+        raise ConflictError,
+              "#{key} has conflicting changes on Jira " \
+              "(fields: #{conflict.changed_fields.join(', ')}). " \
+              "Run `taskmate conflict show #{key}` for details."
+      end
+
+      def build_existing_plan(issue, key, jira_fields)
+        payload = @payload_builder.build_update(issue, jira_fields: jira_fields)
+        field_changes = payload["fields"].map do |field, val|
+          Security::ActionGate::FieldChange.new(field: field, from: jira_fields[field].inspect, to: val.inspect)
+        end
+        warnings    = detect_read_only_warnings(issue, jira_fields)
+        action_plan = Security::ActionGate::ActionPlan.build(field_changes: field_changes, warnings: warnings)
+        [payload, action_plan, warnings]
+      end
+
+      def apply_existing_push(issue, key, payload, warnings, action_plan)
         @jira_client.update_issue(key, payload)
 
-        # Re-fetch Jira's canonical version and write it to disk so that
-        # the local body matches the stored hashes (avoids false conflicts).
+        # Re-fetch Jira's canonical version so local file matches stored hashes
         updated_raw = @jira_client.find_issue(key)
         updated_issue, = @mapper.map(updated_raw)
         updated_issue.last_synced_local_hash = updated_issue.jira_source_hash
@@ -110,58 +114,43 @@ module Taskmate
         audit_path = @security_policy.write_action_audit(
           fields_changed: payload["fields"].keys,
           user_confirmed: true,
-          issue_key:      key,
-          warnings:       warnings
+          issue_key: key,
+          warnings: warnings
         )
 
         PushResult.new(issue_file: updated_issue, applied: true, dry_run: false,
                        action_plan: action_plan, audit_path: audit_path)
       end
 
-      def push_new(issue, dry_run:)
-        payload = @payload_builder.build_create(issue)
-
-        action_plan = Security::ActionGate::ActionPlan.build(
-          field_changes: [
-            Security::ActionGate::FieldChange.new(field: "action", from: nil, to: "create new Jira issue")
-          ],
-          warnings: []
-        )
-
-        return PushResult.new(
-          issue_file:  issue,
-          applied:     false,
-          dry_run:     true,
-          action_plan: action_plan
-        ) if dry_run
-
-        decision = @security_policy.authorize_jira_write(action_plan)
-        return PushResult.new(issue_file: issue, applied: false, dry_run: false, action_plan: action_plan) if decision == :deny
-
-        created = @jira_client.create_issue(payload)
-        new_key = created["key"]
-
-        # Fetch the newly created issue to get canonical Jira state
+      def apply_new_push(issue, payload, action_plan)
+        created      = @jira_client.create_issue(payload)
+        new_key      = created["key"]
         fresh_raw    = @jira_client.find_issue(new_key)
         fresh_issue, = @mapper.map(fresh_raw)
 
-        # Write Jira's canonical version to issues/<KEY>.md and synced copy
-        old_path = issue.path
         new_path = File.join(@workspace_path, "issues", "#{new_key}.md")
         FileUtils.mkdir_p(File.dirname(new_path))
         fresh_issue.last_synced_local_hash = fresh_issue.jira_source_hash
         fresh_issue.write(new_path)
         write_synced_copy(fresh_issue, synced_copy_path(new_key))
-        File.delete(old_path) if old_path && File.exist?(old_path) && old_path != new_path
+        File.delete(issue.path) if issue.path && File.exist?(issue.path) && issue.path != new_path
 
         audit_path = @security_policy.write_action_audit(
           fields_changed: payload["fields"].keys + ["key"],
           user_confirmed: true,
-          issue_key:      new_key
+          issue_key: new_key
         )
 
         PushResult.new(issue_file: fresh_issue, applied: true, dry_run: false,
                        action_plan: action_plan, audit_path: audit_path)
+      end
+
+      def dry_run_result(issue, action_plan)
+        PushResult.new(issue_file: issue, applied: false, dry_run: true, action_plan: action_plan)
+      end
+
+      def deny_result(issue, action_plan)
+        PushResult.new(issue_file: issue, applied: false, dry_run: false, action_plan: action_plan)
       end
 
       def detect_read_only_warnings(issue, jira_fields)

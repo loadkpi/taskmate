@@ -10,8 +10,8 @@ module Taskmate
         @workspace_path     = workspace_path
         @jira_client        = jira_client
         @pull_issue         = PullIssue.new(
-          workspace_path:     workspace_path,
-          jira_client:        jira_client,
+          workspace_path: workspace_path,
+          jira_client: jira_client,
           story_points_field: story_points_field
         )
       end
@@ -26,7 +26,7 @@ module Taskmate
           begin
             result = @pull_issue.call(key)
             pulled << result
-          rescue => e
+          rescue StandardError => e
             failed << FailedItem.new(key: key, error: e.message)
           end
         end

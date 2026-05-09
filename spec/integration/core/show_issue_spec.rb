@@ -3,8 +3,9 @@ require "taskmate/core/show_issue"
 require "taskmate/workspace/issue_file"
 
 RSpec.describe Taskmate::Core::ShowIssue do
-  let(:workspace) { create_temp_workspace(initialized: true) }
   subject(:service) { described_class.new(workspace_path: workspace) }
+
+  let(:workspace) { create_temp_workspace(initialized: true) }
 
   def write_issue(key, summary: "Test Issue", body: "Body text\n")
     fm = { "key" => key, "summary" => summary, "issue_type" => "Task",

@@ -7,16 +7,14 @@ require "taskmate/ai/providers/fake_provider"
 require "taskmate/skills/runner"
 
 # New task workflow: create-task → push
-RSpec.describe "New task workflow", type: :integration do
+RSpec.describe "New task workflow", type: :integration do # rubocop:disable RSpec/MultipleMemoizedHelpers
   let(:workspace) { create_temp_workspace(initialized: true) }
   let(:jira_client) { FakeJiraClient.new }
 
   let(:fake_policy) do
     policy = instance_double(Taskmate::Security::Policy)
-    allow(policy).to receive(:authorize_ai_call).and_return(:allow)
-    allow(policy).to receive(:authorize_jira_write).and_return(:allow)
-    allow(policy).to receive(:write_ai_audit).and_return("/tmp/ai-audit.yml")
-    allow(policy).to receive(:write_action_audit).and_return("/tmp/audit.yml")
+    allow(policy).to receive_messages(authorize_ai_call: :allow, authorize_jira_write: :allow,
+                                      write_ai_audit: "/tmp/ai-audit.yml", write_action_audit: "/tmp/audit.yml")
     policy
   end
 
@@ -53,18 +51,18 @@ RSpec.describe "New task workflow", type: :integration do
 
   let(:skill_runner) do
     Taskmate::Skills::Runner.new(
-      workspace_path:  workspace,
-      ai_provider:     fake_ai,
+      workspace_path: workspace,
+      ai_provider: fake_ai,
       security_policy: fake_policy
     )
   end
 
-  it "creates a local task and pushes it to Jira" do
+  it "creates a local task and pushes it to Jira" do # rubocop:disable RSpec/ExampleLength,RSpec/MultipleExpectations
     # Step 1: Create local task
     create_result = Taskmate::Core::CreateLocalTask.new(
       workspace_path: workspace,
-      skill_runner:   skill_runner,
-      action_gate:    fake_action_gate
+      skill_runner: skill_runner,
+      action_gate: fake_action_gate
     ).call("Add password reset feature")
 
     expect(create_result.applied).to be true
@@ -76,8 +74,8 @@ RSpec.describe "New task workflow", type: :integration do
 
     # Step 2: Push to Jira (creates new issue)
     push_result = Taskmate::Core::PushIssue.new(
-      workspace_path:  workspace,
-      jira_client:     jira_client,
+      workspace_path: workspace,
+      jira_client: jira_client,
       security_policy: fake_policy
     ).call(create_result.path)
 

@@ -3,16 +3,15 @@ require "taskmate/security/action_gate"
 
 RSpec.describe Taskmate::Security::ActionGate do
   let(:output) { StringIO.new }
-
-  def change(field:, from:, to:)
-    described_class::FieldChange.new(field: field, from: from, to: to)
-  end
-
   let(:plan) do
     described_class::ActionPlan.build(
       field_changes: [change(field: "status", from: "Open", to: "In Progress")],
-      warnings:      ["read-only field 'key' was not changed"]
+      warnings: ["read-only field 'key' was not changed"]
     )
+  end
+
+  def change(field:, from:, to:)
+    described_class::FieldChange.new(field: field, from: from, to: to)
   end
 
   describe "#confirm in non_interactive mode" do

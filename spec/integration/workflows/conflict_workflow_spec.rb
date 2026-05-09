@@ -8,33 +8,32 @@ RSpec.describe "Conflict workflow", type: :integration do
   let(:workspace) { create_temp_workspace(initialized: true) }
   let(:jira_client) do
     FakeJiraClient.new(issues: {
-      "TEST-2" => {
-        "summary" => "Initial summary",
-        "labels"  => [],
-        "status"  => { "name" => "To Do", "id" => "1",
-                       "statusCategory" => { "key" => "new" } }
-      }
-    })
+                         "TEST-2" => {
+                           "summary" => "Initial summary",
+                           "labels" => [],
+                           "status" => { "name" => "To Do", "id" => "1",
+                                         "statusCategory" => { "key" => "new" } }
+                         }
+                       })
   end
 
   let(:fake_policy) do
     policy = instance_double(Taskmate::Security::Policy)
-    allow(policy).to receive(:authorize_jira_write).and_return(:allow)
-    allow(policy).to receive(:write_action_audit).and_return("/tmp/audit.yml")
+    allow(policy).to receive_messages(authorize_jira_write: :allow, write_action_audit: "/tmp/audit.yml")
     policy
   end
 
   def pull_issue(key)
     Taskmate::Core::PullIssue.new(
       workspace_path: workspace,
-      jira_client:    jira_client
+      jira_client: jira_client
     ).call(key)
   end
 
   def push_issue(key)
     Taskmate::Core::PushIssue.new(
-      workspace_path:  workspace,
-      jira_client:     jira_client,
+      workspace_path: workspace,
+      jira_client: jira_client,
       security_policy: fake_policy
     ).call(key)
   end
@@ -45,7 +44,7 @@ RSpec.describe "Conflict workflow", type: :integration do
 
     # Step 2: Edit locally
     content = File.read(pull_result.path)
-    File.write(pull_result.path, content + "\nLocal addition.\n")
+    File.write(pull_result.path, "#{content}\nLocal addition.\n")
 
     # Step 3: Remote Jira changes the issue (simulates another user)
     jira_client.remote_update("TEST-2", "summary" => "Remote change by another user")
@@ -59,7 +58,7 @@ RSpec.describe "Conflict workflow", type: :integration do
 
     # Local edit
     content = File.read(pull_result.path)
-    File.write(pull_result.path, content + "\nLocal addition.\n")
+    File.write(pull_result.path, "#{content}\nLocal addition.\n")
 
     # Remote change
     jira_client.remote_update("TEST-2", "summary" => "Remote change by another user")

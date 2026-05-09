@@ -13,7 +13,7 @@ module Taskmate
         def call(key, workspace_path = Dir.pwd)
           fmt_str = @options[:format].to_s
           unless VALID_FORMATS.include?(fmt_str)
-            raise Taskmate::ValidationError, "Invalid format '#{fmt_str}'. Valid options: #{VALID_FORMATS.join(", ")}"
+            raise Taskmate::ValidationError, "Invalid format '#{fmt_str}'. Valid options: #{VALID_FORMATS.join(', ')}"
           end
 
           diff = Core::DiffIssue.new(workspace_path: workspace_path).call(key)
@@ -32,17 +32,17 @@ module Taskmate
             puts "No changes in #{key}"
           else
             puts "Diff for #{key} (vs last pull):\n\n"
-            puts diff.to_s
+            puts diff
           end
         end
 
         def render_json(diff)
           require "json"
           puts JSON.pretty_generate({
-            "issue_key" => diff.issue_key,
-            "empty" => diff.empty?,
-            "hunks" => diff.hunks
-          })
+                                      "issue_key" => diff.issue_key,
+                                      "empty" => diff.empty?,
+                                      "hunks" => diff.hunks
+                                    })
         end
       end
     end

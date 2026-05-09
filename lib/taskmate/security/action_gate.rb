@@ -16,9 +16,10 @@ module Taskmate
       end
 
       # Returns :allow or :deny
-      def confirm(action_plan)
+      def confirm(action_plan, preamble: nil)
         return :deny if @non_interactive
 
+        @output.puts preamble if preamble
         show_plan(action_plan)
         prompt_user
       end

@@ -4,6 +4,8 @@ require "taskmate/workspace/issue_file"
 require "taskmate/workspace/diff"
 
 RSpec.describe Taskmate::Core::DiffIssue do
+  subject(:service) { described_class.new(workspace_path: tmpdir) }
+
   let(:tmpdir) { Dir.mktmpdir }
   let(:issues_dir) { File.join(tmpdir, "issues").tap { |d| FileUtils.mkdir_p(d) } }
 
@@ -15,8 +17,6 @@ RSpec.describe Taskmate::Core::DiffIssue do
     File.write(path, content)
     path
   end
-
-  subject(:service) { described_class.new(workspace_path: tmpdir) }
 
   describe "#call" do
     it "returns a Workspace::Diff object" do

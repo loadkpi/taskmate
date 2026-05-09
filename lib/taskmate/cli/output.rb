@@ -18,11 +18,11 @@ module Taskmate
       end
 
       def self.error(msg)
-        $stderr.puts pastel.red(msg)
+        warn pastel.red(msg)
       end
 
       def self.warn(msg)
-        $stderr.puts pastel.yellow(msg)
+        warn pastel.yellow(msg)
       end
 
       def self.info(msg)
@@ -68,11 +68,11 @@ module Taskmate
         def auto_spin; end
 
         def success(_msg)
-          $stderr.puts "done"
+          warn "done"
         end
 
         def error(_msg)
-          $stderr.puts "failed"
+          warn "failed"
         end
       end
 

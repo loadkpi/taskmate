@@ -12,7 +12,7 @@ module Taskmate
           client = build_jira_client(workspace_path)
           result = Core::ConflictShow.new(
             workspace_path: workspace_path,
-            jira_client:    client
+            jira_client: client
           ).call(key)
 
           cr = result.conflict_result
@@ -23,7 +23,7 @@ module Taskmate
           end
 
           puts "CONFLICT: #{key}"
-          puts "Fields changed on Jira side: #{cr.changed_fields.join(", ")}"
+          puts "Fields changed on Jira side: #{cr.changed_fields.join(', ')}"
           puts "\nLocal jira_source_hash : #{cr.local_hash}"
           puts "Current Jira hash      : #{cr.jira_hash}"
           puts "\nOptions:"
@@ -39,13 +39,17 @@ module Taskmate
           extend Taskmate::Doctor::Checks::ConfigReader
 
           config   = load_workspace_config(workspace_path)
-          base_url = ENV["TASKMATE_JIRA_URL"] || (config.is_a?(Hash) ? config.dig("jira", "base_url").to_s : "")
+          base_url = ENV["TASKMATE_JIRA_URL"] || (if config.is_a?(Hash)
+                                                    (config.dig("tracker",
+                                                                "base_url") || config.dig("jira",
+                                                                                          "base_url")).to_s
+                                                  else
+                                                    ""
+                                                  end)
           email    = ENV["TASKMATE_JIRA_EMAIL"] || ""
-          token    = ENV["TASKMATE_JIRA_TOKEN"]  || ""
+          token    = ENV["TASKMATE_JIRA_TOKEN"] || ""
 
-          if base_url.empty? || email.empty? || token.empty?
-            raise Taskmate::JiraAuthError, "Missing Jira credentials."
-          end
+          raise Taskmate::JiraAuthError, "Missing Jira credentials." if base_url.empty? || email.empty? || token.empty?
 
           Jira::Client.new(base_url: base_url, email: email, api_token: token)
         end

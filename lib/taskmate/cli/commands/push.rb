@@ -17,22 +17,27 @@ module Taskmate
           dry_run = @options[:dry_run] || false
 
           unless VALID_FORMATS.include?(fmt)
-            raise Taskmate::ValidationError, "Invalid format '#{fmt}'. Valid: #{VALID_FORMATS.join(", ")}"
+            raise Taskmate::ValidationError, "Invalid format '#{fmt}'. Valid: #{VALID_FORMATS.join(', ')}"
           end
 
           require "taskmate/doctor/checks/config_reader"
           extend Taskmate::Doctor::Checks::ConfigReader
+
           config = load_workspace_config(workspace_path)
 
           client  = build_jira_client(config)
           policy  = Security::Policy.new(workspace_path: workspace_path)
 
           result = Core::PushIssue.new(
-            workspace_path:     workspace_path,
-            jira_client:        client,
-            security_policy:    policy,
-            push_config:        build_push_config(config),
-            story_points_field: config.is_a?(Hash) ? config.dig("jira", "story_points_field") : nil
+            workspace_path: workspace_path,
+            jira_client: client,
+            security_policy: policy,
+            push_config: build_push_config(config),
+            story_points_field: if config.is_a?(Hash)
+                                  config.dig("tracker",
+                                             "story_points_field") || config.dig("jira",
+                                                                                 "story_points_field")
+                                end
           ).call(key, dry_run: dry_run)
 
           if fmt == "json"
@@ -62,7 +67,7 @@ module Taskmate
         def render_json(result)
           require "json"
           puts JSON.pretty_generate(
-            "key"     => result.issue_file.key,
+            "key" => result.issue_file.key,
             "applied" => result.applied,
             "dry_run" => result.dry_run
           )
@@ -71,25 +76,38 @@ module Taskmate
         def build_jira_client(config)
           require "taskmate/jira/client"
 
-          base_url = ENV["TASKMATE_JIRA_URL"] || (config.is_a?(Hash) ? config.dig("jira", "base_url").to_s : "")
+          base_url = ENV["TASKMATE_JIRA_URL"] || (if config.is_a?(Hash)
+                                                    (config.dig("tracker",
+                                                                "base_url") || config.dig("jira",
+                                                                                          "base_url")).to_s
+                                                  else
+                                                    ""
+                                                  end)
           email    = ENV["TASKMATE_JIRA_EMAIL"] || ""
-          token    = ENV["TASKMATE_JIRA_TOKEN"]  || ""
+          token    = ENV["TASKMATE_JIRA_TOKEN"] || ""
 
           if base_url.empty? || email.empty? || token.empty?
-            raise Taskmate::JiraAuthError, "Missing Jira credentials. Set TASKMATE_JIRA_URL, TASKMATE_JIRA_EMAIL, TASKMATE_JIRA_TOKEN."
+            raise Taskmate::JiraAuthError,
+                  "Missing Jira credentials. Set TASKMATE_JIRA_URL, TASKMATE_JIRA_EMAIL, TASKMATE_JIRA_TOKEN."
           end
 
           Jira::Client.new(base_url: base_url, email: email, api_token: token)
         end
 
         def build_push_config(config)
-          return {} unless config.is_a?(Hash)
+          return default_push_config unless config.is_a?(Hash)
 
           allowed = Array(config.dig("push", "allowed_fields"))
-          return {} if allowed.empty?
+          return default_push_config if allowed.empty?
 
           all_fields = %w[summary description labels components priority]
-          all_fields.each_with_object({}) { |f, h| h["allow_#{f}"] = allowed.include?(f) }
+          all_fields.to_h { |f| ["allow_#{f}", allowed.include?(f)] }
+        end
+
+        def default_push_config
+          # Fail-closed: when no explicit allowlist is configured, allow the standard safe fields
+          %w[summary description labels components priority]
+            .to_h { |f| ["allow_#{f}", true] }
         end
       end
     end

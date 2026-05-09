@@ -20,13 +20,13 @@ module Taskmate
       def write_action_audit(fields_changed:, user_confirmed:, dry_run: false,
                              issue_key: nil, warnings: [])
         entry = {
-          "type"           => "action_audit",
-          "timestamp"      => timestamp_ms,
-          "issue_key"      => issue_key,
+          "type" => "action_audit",
+          "timestamp" => timestamp_ms,
+          "issue_key" => issue_key,
           "fields_changed" => fields_changed,
           "user_confirmed" => user_confirmed,
-          "dry_run"        => dry_run,
-          "warnings"       => warnings
+          "dry_run" => dry_run,
+          "warnings" => warnings
         }
         write_to("audit/actions", entry)
       end
@@ -40,12 +40,12 @@ module Taskmate
       # @param issue_key   [String, nil]
       def write_ai_audit(skill:, provider:, model:, prompt_hash:, issue_key: nil)
         entry = {
-          "type"        => "ai_call_audit",
-          "timestamp"   => timestamp_ms,
-          "issue_key"   => issue_key,
-          "skill"       => skill,
-          "provider"    => provider,
-          "model"       => model,
+          "type" => "ai_call_audit",
+          "timestamp" => timestamp_ms,
+          "issue_key" => issue_key,
+          "skill" => skill,
+          "provider" => provider,
+          "model" => model,
           "prompt_hash" => prompt_hash
         }
         write_to("audit/ai", entry)
@@ -63,9 +63,9 @@ module Taskmate
       end
 
       def write_to(subdir, entry)
-        dir  = File.join(@workspace_path, subdir)
+        dir = File.join(@workspace_path, subdir)
         FileUtils.mkdir_p(dir)
-        name = "#{entry["timestamp"]}-#{subdir.split("/").last}-#{SecureRandom.hex(4)}.yml"
+        name = "#{entry['timestamp']}-#{subdir.split('/').last}-#{SecureRandom.hex(4)}.yml"
         path = File.join(dir, name)
         File.write(path, YAML.dump(entry), encoding: "utf-8")
         path

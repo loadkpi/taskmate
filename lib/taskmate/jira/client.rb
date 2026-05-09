@@ -7,7 +7,7 @@ module Taskmate
   module Jira
     class Client
       DEFAULT_MAX_RETRIES = 3
-      API_VERSION         = "rest/api/3"
+      API_VERSION         = "rest/api/3".freeze
 
       def initialize(base_url:, email:, api_token:, max_retries: DEFAULT_MAX_RETRIES)
         @base_url = base_url.to_s.chomp("/")
@@ -78,7 +78,8 @@ module Taskmate
         when 404
           raise JiraNotFoundError, "Jira resource not found (404) for #{method} #{path}."
         else
-          raise JiraWriteError, "Jira write error (#{response.status}) for #{method} #{path}: #{response.body.to_s[0, 200]}"
+          raise JiraWriteError,
+                "Jira write error (#{response.status}) for #{method} #{path}: #{response.body.to_s[0, 200]}"
         end
       end
 
@@ -130,11 +131,11 @@ module Taskmate
           f.headers["Accept"]        = "application/json"
 
           f.request :retry,
-            max:                 max_retries,
-            interval:            0.5,
-            interval_randomness: 0.5,
-            backoff_factor:      2,
-            retry_statuses:      [429, 500, 502, 503, 504]
+                    max: max_retries,
+                    interval: 0.5,
+                    interval_randomness: 0.5,
+                    backoff_factor: 2,
+                    retry_statuses: [429, 500, 502, 503, 504]
 
           f.adapter Faraday.default_adapter
         end

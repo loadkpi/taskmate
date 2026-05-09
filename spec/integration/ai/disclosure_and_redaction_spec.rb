@@ -26,13 +26,13 @@ RSpec.describe "AI disclosure and redaction integration" do
     )
     consent_mgr = Taskmate::Security::FakeConsentManager.new(response: consent_response)
     policy = Taskmate::Security::Policy.new(
-      workspace_path:  workspace,
+      workspace_path: workspace,
       consent_manager: consent_mgr
     )
     [
       Taskmate::Skills::Runner.new(
-        workspace_path:  workspace,
-        ai_provider:     provider,
+        workspace_path: workspace,
+        ai_provider: provider,
         security_policy: policy
       ),
       provider
@@ -80,9 +80,9 @@ RSpec.describe "AI disclosure and redaction integration" do
       runner, provider = runner_with(consent_response: :deny)
       issue = build_issue(body: "Normal description.")
 
-      expect {
+      expect do
         runner.run(skill_id: "improve-task", issue_file: issue)
-      }.to raise_error(Taskmate::ConsentDeniedError)
+      end.to raise_error(Taskmate::ConsentDeniedError)
 
       expect(provider.call_count).to eq(0)
     end
@@ -93,9 +93,9 @@ RSpec.describe "AI disclosure and redaction integration" do
       runner, provider = runner_with(consent_response: :allow)
       issue = build_issue(body: "Token: AKIAIOSFODNN7EXAMPLE is hardcoded.")
 
-      expect {
+      expect do
         runner.run(skill_id: "improve-task", issue_file: issue)
-      }.to raise_error(Taskmate::ConsentDeniedError)
+      end.to raise_error(Taskmate::ConsentDeniedError)
 
       expect(provider.call_count).to eq(0)
     end
@@ -111,7 +111,7 @@ RSpec.describe "AI disclosure and redaction integration" do
 
       audit_file = Dir.glob(File.join(workspace, "audit", "ai", "*.yml")).first
       require "yaml"
-      data = YAML.safe_load(File.read(audit_file))
+      data = YAML.safe_load_file(audit_file)
       expect(data["provider"]).to include("FakeProvider")
     end
   end

@@ -39,10 +39,10 @@ module Taskmate
                                           conversion.unsupported_nodes)
 
         PullResult.new(
-          issue_file:       issue,
-          path:             issue_path,
-          synced_path:      synced_path,
-          adf_backup_path:  adf_backup_path,
+          issue_file: issue,
+          path: issue_path,
+          synced_path: synced_path,
+          adf_backup_path: adf_backup_path,
           unsupported_nodes: conversion.unsupported_nodes
         )
       end
@@ -67,9 +67,9 @@ module Taskmate
 
       def save_adf_backup(key, adf, unsupported_nodes)
         Jira::AdfBackup.save(
-          key:              key,
-          adf:              adf,
-          workspace_path:   @workspace_path,
+          key: key,
+          adf: adf,
+          workspace_path: @workspace_path,
           unsupported_nodes: unsupported_nodes
         )
       end

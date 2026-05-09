@@ -24,7 +24,7 @@ module Taskmate
         issue = Workspace::IssueFile.read(issue_path)
 
         run_result = @skill_runner.run(
-          skill_id:   "review-task",
+          skill_id: "review-task",
           issue_file: issue
         )
 
@@ -33,10 +33,10 @@ module Taskmate
         review_path      = write_review(key, review_markdown)
 
         ReviewResult.new(
-          issue_file:     issue,
+          issue_file: issue,
           review_markdown: review_markdown,
           readiness_score: readiness_score,
-          review_path:     review_path
+          review_path: review_path
         )
       end
 
@@ -48,7 +48,7 @@ module Taskmate
       end
 
       def write_review(key, markdown)
-        dir  = File.join(@workspace_path, "reviews")
+        dir = File.join(@workspace_path, "reviews")
         FileUtils.mkdir_p(dir)
         path = File.join(dir, "#{key}.review.md")
         tmp  = "#{path}.tmp.#{Process.pid}"

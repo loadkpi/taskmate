@@ -26,7 +26,7 @@ module Taskmate
           h[field] = val.is_a?(Array) && val.all? { |e| e.is_a?(String) || e.is_a?(Numeric) } ? val.sort : val
         end
 
-        normalized_body = body.to_s.gsub(/\r\n/, "\n").strip
+        normalized_body = body.to_s.gsub("\r\n", "\n").strip
 
         JSON.generate({ "fields" => selected, "body" => normalized_body })
       end

@@ -4,8 +4,9 @@ require "taskmate/workspace/issue_file"
 require "taskmate/workspace/canonical_hash"
 
 RSpec.describe Taskmate::Core::WorkspaceStatus do
-  let(:workspace) { create_temp_workspace(initialized: true) }
   subject(:service) { described_class.new(workspace_path: workspace) }
+
+  let(:workspace) { create_temp_workspace(initialized: true) }
 
   def write_issue(key, extra_fm = {}, body: "Body\n")
     fm = { "key" => key, "summary" => "Issue #{key}", "issue_type" => "Task" }.merge(extra_fm)

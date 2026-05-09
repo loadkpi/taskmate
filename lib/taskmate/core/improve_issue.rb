@@ -21,51 +21,30 @@ module Taskmate
         issue_path = File.join(@workspace_path, "issues", "#{key}.md")
         raise IssueNotFoundError, "No local file for #{key}." unless File.exist?(issue_path)
 
-        issue = Workspace::IssueFile.read(issue_path)
+        issue    = Workspace::IssueFile.read(issue_path)
+        proposed = @skill_runner.run(skill_id: "improve-task", issue_file: issue, instruction: instruction).response_text
+        diff     = Workspace::Diff.new(issue_key: key, original: issue.raw_content, modified: proposed)
 
-        run_result  = @skill_runner.run(
-          skill_id:   "improve-task",
-          issue_file: issue,
-          instruction: instruction
-        )
-
-        proposed = run_result.response_text
-        diff     = Workspace::Diff.new(
-          issue_key: key,
-          original:  issue.raw_content,
-          modified:  proposed
-        )
-
-        puts diff.to_s
-
-        answer = @action_gate.confirm(
-          Security::ActionGate::ActionPlan.build(
-            field_changes: [],
-            warnings:      []
-          )
-        )
-
-        return ImproveResult.new(
-          issue_file:       issue,
-          proposed_content: proposed,
-          diff:             diff,
-          applied:          false,
-          audit_path:       nil
-        ) if answer == :deny
-
-        dest = output_path || issue_path
-        write_proposed(proposed, dest)
-
-        ImproveResult.new(
-          issue_file:       issue,
-          proposed_content: proposed,
-          diff:             diff,
-          applied:          true,
-          audit_path:       nil
-        )
+        confirm_and_apply(issue, proposed, diff, output_path || issue_path)
       end
 
       private
+
+      def confirm_and_apply(issue, proposed, diff, dest)
+        answer = @action_gate.confirm(
+          Security::ActionGate::ActionPlan.build(field_changes: [], warnings: []),
+          preamble: diff.to_s
+        )
+
+        if answer == :deny
+          return ImproveResult.new(issue_file: issue, proposed_content: proposed,
+                                   diff: diff, applied: false, audit_path: nil)
+        end
+
+        write_proposed(proposed, dest)
+        ImproveResult.new(issue_file: issue, proposed_content: proposed,
+                          diff: diff, applied: true, audit_path: nil)
+      end
 
       def write_proposed(content, path)
         tmp = "#{path}.tmp.#{Process.pid}"

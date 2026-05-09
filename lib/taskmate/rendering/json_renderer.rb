@@ -11,13 +11,13 @@ module Taskmate
 
       def json_issue(issue_file)
         {
-          "key"        => issue_file.key,
-          "summary"    => issue_file.summary,
-          "status"     => issue_file.status,
+          "key" => issue_file.key,
+          "summary" => issue_file.summary,
+          "status" => issue_file.status,
           "issue_type" => issue_file.issue_type,
-          "priority"   => issue_file.priority,
-          "labels"     => issue_file.labels,
-          "assignee"   => issue_file.frontmatter["assignee"],
+          "priority" => issue_file.priority,
+          "labels" => issue_file.labels,
+          "assignee" => issue_file.frontmatter["assignee"],
           "sync_state" => issue_file.sync_state
         }
       end

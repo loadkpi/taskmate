@@ -29,43 +29,57 @@ module Taskmate
       # Only includes fields that differ from the Jira version.
       def build_update(issue_file, jira_fields: {})
         fields = {}
-
-        if allow?("summary") && issue_file.summary != jira_fields["summary"]
-          fields["summary"] = issue_file.summary
-        end
-
-        if allow?("description")
-          local_body = issue_file.body.strip
-          jira_body  = @back_converter.convert(jira_fields["description"]).markdown.strip
-          if local_body != jira_body
-            fields["description"] = local_body.empty? ? nil : adf(local_body)
-          end
-        end
-
-        if allow?("labels")
-          local_labels = issue_file.labels.sort
-          jira_labels  = Array(jira_fields["labels"]).sort
-          fields["labels"] = issue_file.labels if local_labels != jira_labels
-        end
-
-        if allow?("components")
-          local_components = issue_file.components.sort
-          jira_components  = Array(jira_fields["components"]).map { |c| c["name"] }.sort
-          fields["components"] = components_payload(issue_file) if local_components != jira_components
-        end
-
-        if allow?("priority") && issue_file.priority
-          jira_priority = jira_fields.dig("priority", "name")
-          fields["priority"] = { "name" => issue_file.priority } if issue_file.priority != jira_priority
-        end
-
+        maybe_update_summary(fields, issue_file, jira_fields)
+        maybe_update_description(fields, issue_file, jira_fields)
+        maybe_update_labels(fields, issue_file, jira_fields)
+        maybe_update_components(fields, issue_file, jira_fields)
+        maybe_update_priority(fields, issue_file, jira_fields)
         { "fields" => fields }
       end
 
       private
 
+      def maybe_update_summary(fields, issue_file, jira_fields)
+        return unless allow?("summary") && issue_file.summary != jira_fields["summary"]
+
+        fields["summary"] = issue_file.summary
+      end
+
+      def maybe_update_description(fields, issue_file, jira_fields)
+        return unless allow?("description")
+
+        local_body = issue_file.body.strip
+        jira_body  = @back_converter.convert(jira_fields["description"]).markdown.strip
+        return if local_body == jira_body
+
+        fields["description"] = local_body.empty? ? nil : adf(local_body)
+      end
+
+      def maybe_update_labels(fields, issue_file, jira_fields)
+        return unless allow?("labels")
+        return if issue_file.labels.sort == Array(jira_fields["labels"]).sort
+
+        fields["labels"] = issue_file.labels
+      end
+
+      def maybe_update_components(fields, issue_file, jira_fields)
+        return unless allow?("components")
+
+        jira_comps = Array(jira_fields["components"]).map { |c| c["name"] }.sort
+        return if issue_file.components.sort == jira_comps
+
+        fields["components"] = components_payload(issue_file)
+      end
+
+      def maybe_update_priority(fields, issue_file, jira_fields)
+        return unless allow?("priority") && issue_file.priority
+        return if issue_file.priority == jira_fields.dig("priority", "name")
+
+        fields["priority"] = { "name" => issue_file.priority }
+      end
+
       def allow?(field)
-        @push_config.fetch("allow_#{field}", true)
+        @push_config.fetch("allow_#{field}", false)
       end
 
       def adf(markdown)

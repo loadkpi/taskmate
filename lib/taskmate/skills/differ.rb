@@ -16,25 +16,21 @@ module Taskmate
       def diff(skill_id)
         builtin_path = File.join(BUILTINS_DIR, skill_id, "skill.md")
 
-        unless File.exist?(builtin_path)
-          return DiffResult.new(status: :custom, diff_text: nil)
-        end
+        return DiffResult.new(status: :custom, diff_text: nil) unless File.exist?(builtin_path)
 
         local_path = File.join(@workspace_path, "skills", skill_id, "skill.md")
-        unless File.exist?(local_path)
-          return DiffResult.new(status: :custom, diff_text: nil)
-        end
+        return DiffResult.new(status: :custom, diff_text: nil) unless File.exist?(local_path)
 
-        local_content   = File.read(local_path,   encoding: "utf-8")
-        builtin_content = File.read(builtin_path,  encoding: "utf-8")
+        local_content   = File.read(local_path, encoding: "utf-8")
+        builtin_content = File.read(builtin_path, encoding: "utf-8")
 
         if local_content == builtin_content
           DiffResult.new(status: :no_changes, diff_text: nil)
         else
           d = Workspace::Diff.new(
             issue_key: skill_id,
-            original:  builtin_content,
-            modified:  local_content
+            original: builtin_content,
+            modified: local_content
           )
           # Build skill-specific headers (Workspace::Diff always uses issues/ prefix)
           skill_path = "skills/#{skill_id}/skill.md"

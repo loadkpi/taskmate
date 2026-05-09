@@ -7,7 +7,7 @@ module Taskmate
         end
       end
 
-      REQUIRED_FIELDS       = %w[id version kind inputs outputs security].freeze
+      REQUIRED_FIELDS = %w[id version kind inputs outputs security].freeze
       REQUIRED_SECURITY_KEYS = %w[external_ai jira_write].freeze
 
       def validate(skill)
@@ -26,9 +26,7 @@ module Taskmate
           errors << "Security section must be a mapping"
         end
 
-        if skill.prompt_body.nil? || skill.prompt_body.strip.empty?
-          errors << "Prompt body is empty"
-        end
+        errors << "Prompt body is empty" if skill.prompt_body.nil? || skill.prompt_body.strip.empty?
 
         ValidationResult.new(valid: errors.empty?, errors: errors)
       end

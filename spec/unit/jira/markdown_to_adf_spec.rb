@@ -4,6 +4,7 @@ require "taskmate/jira/adf_to_markdown"
 
 RSpec.describe Taskmate::Jira::MarkdownToAdf do
   subject(:converter) { described_class.new }
+
   let(:back_converter) { Taskmate::Jira::AdfToMarkdown.new }
 
   describe "#convert" do
@@ -63,14 +64,14 @@ RSpec.describe Taskmate::Jira::MarkdownToAdf do
     context "inline marks" do
       it "converts **bold** to strong mark" do
         adf = converter.convert("Hello **world**.\n")
-        para    = adf.dig("content", 0)
+        para = adf.dig("content", 0)
         bold_node = para["content"].find { |n| n["text"] == "world" }
         expect(bold_node["marks"].map { |m| m["type"] }).to include("strong")
       end
 
       it "converts *italic* to em mark" do
         adf = converter.convert("Hello *world*.\n")
-        para      = adf.dig("content", 0)
+        para = adf.dig("content", 0)
         italic_node = para["content"].find { |n| n["text"] == "world" }
         expect(italic_node["marks"].map { |m| m["type"] }).to include("em")
       end
@@ -102,7 +103,7 @@ RSpec.describe Taskmate::Jira::MarkdownToAdf do
 
   describe "round-trip stability" do
     def round_trip(markdown)
-      adf      = converter.convert(markdown)
+      adf = converter.convert(markdown)
       back_converter.convert(adf).markdown
     end
 

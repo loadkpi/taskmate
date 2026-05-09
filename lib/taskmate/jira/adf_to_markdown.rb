@@ -18,44 +18,46 @@ module Taskmate
         return "" if node.nil? || node.empty?
 
         case node["type"]
-        when "doc", "listItem"
-          render_children(node, separator: "\n")
-        when "paragraph"
-          content = render_children(node)
-          content.empty? ? "" : "#{content}\n"
-        when "heading"
-          level   = node.dig("attrs", "level") || 1
-          prefix  = "#" * [level, 6].min
-          "#{prefix} #{render_children(node)}\n"
-        when "bulletList"
-          render_list(node, ordered: false)
-        when "orderedList"
-          render_list(node, ordered: true)
-        when "codeBlock"
-          lang = node.dig("attrs", "language") || ""
-          code = render_children(node)
-          code = "#{code}\n" unless code.end_with?("\n")
-          "```#{lang}\n#{code}```\n"
-        when "hardBreak"
-          "\n"
-        when "text"
-          apply_marks(node["text"].to_s, Array(node["marks"]))
-        when "blockquote"
-          render_children(node, separator: "\n")
-            .each_line.map { |l| "> #{l}" }.join
-        when "rule"
-          "---\n"
-        when "mediaSingle", "media", "table", "tableRow", "tableHeader", "tableCell",
-             "expand", "nestedExpand", "emoji", "mention", "inlineCard", "blockCard",
-             "panel"
-          type = node["type"]
-          @unsupported_nodes << type
-          "<!-- taskmate: unsupported_adf_node type=\"#{type}\" -->\n"
-        else
-          type = node["type"] || "unknown"
-          @unsupported_nodes << type
-          "<!-- taskmate: unsupported_adf_node type=\"#{type}\" -->\n"
+        when "doc", "listItem" then render_children(node, separator: "\n")
+        when "paragraph"       then render_paragraph(node)
+        when "heading"         then render_heading(node)
+        when "bulletList"      then render_list(node, ordered: false)
+        when "orderedList"     then render_list(node, ordered: true)
+        when "codeBlock"       then render_code_block(node)
+        when "hardBreak"       then "\n"
+        when "text"            then apply_marks(node["text"].to_s, Array(node["marks"]))
+        when "blockquote"      then render_blockquote(node)
+        when "rule"            then "---\n"
+        else                        record_unsupported(node)
         end
+      end
+
+      def render_paragraph(node)
+        content = render_children(node)
+        content.empty? ? "" : "#{content}\n"
+      end
+
+      def render_heading(node)
+        level  = node.dig("attrs", "level") || 1
+        prefix = "#" * [level, 6].min
+        "#{prefix} #{render_children(node)}\n"
+      end
+
+      def render_code_block(node)
+        lang = node.dig("attrs", "language") || ""
+        code = render_children(node)
+        code = "#{code}\n" unless code.end_with?("\n")
+        "```#{lang}\n#{code}```\n"
+      end
+
+      def render_blockquote(node)
+        render_children(node, separator: "\n").each_line.map { |l| "> #{l}" }.join
+      end
+
+      def record_unsupported(node)
+        type = node["type"] || "unknown"
+        @unsupported_nodes << type
+        "<!-- taskmate: unsupported_adf_node type=\"#{type}\" -->\n"
       end
 
       def render_children(node, separator: "")
@@ -84,9 +86,9 @@ module Taskmate
           when "link"
             href = mark.dig("attrs", "href") || ""
             "[#{acc}](#{href})"
-          when "strike"      then "~~#{acc}~~"
+          when "strike" then "~~#{acc}~~"
           when "underline", "textColor", "subsup"
-            acc  # no Markdown equivalent; keep text
+            acc # no Markdown equivalent; keep text
           else
             @unsupported_nodes << "mark:#{mark['type']}"
             acc

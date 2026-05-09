@@ -1,5 +1,3 @@
-require "pathname"
-
 module Taskmate
   module Workspace
     class IgnoreRules

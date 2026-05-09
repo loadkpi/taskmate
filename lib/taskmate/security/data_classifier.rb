@@ -20,8 +20,8 @@ module Taskmate
 
         if @ignore_rules.ignored?(relative_path.to_s)
           return Classification.new(
-            level:          :excluded,
-            sections:       [],
+            level: :excluded,
+            sections: [],
             excluded_paths: [relative_path]
           )
         end
@@ -30,8 +30,8 @@ module Taskmate
         max_level = highest_level(sections.map(&:level))
 
         Classification.new(
-          level:          max_level,
-          sections:       sections,
+          level: max_level,
+          sections: sections,
           excluded_paths: []
         )
       end
@@ -52,9 +52,9 @@ module Taskmate
 
         # Classify body
         sections << Section.new(
-          name:    "body",
+          name: "body",
           content: issue_file.body,
-          level:   level_for(issue_file.body)
+          level: level_for(issue_file.body)
         )
 
         # Classify key frontmatter fields that might contain sensitive content
@@ -63,9 +63,9 @@ module Taskmate
           next if val.empty?
 
           sections << Section.new(
-            name:    field,
+            name: field,
             content: val,
-            level:   level_for(val)
+            level: level_for(val)
           )
         end
 
@@ -85,7 +85,7 @@ module Taskmate
       end
 
       def highest_level(levels)
-        LEVELS.reverse.find { |l| levels.include?(l) } || :safe
+        LEVELS.rfind { |l| levels.include?(l) } || :safe
       end
     end
   end

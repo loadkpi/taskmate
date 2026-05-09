@@ -20,9 +20,7 @@ module Taskmate
         def complete(prompt:, skill_id:, model: nil)
           @calls << Call.new(prompt: prompt, skill_id: skill_id, model: model)
 
-          if @error_for.include?(skill_id)
-            raise SimulatedError, "Simulated AI error for skill: #{skill_id}"
-          end
+          raise SimulatedError, "Simulated AI error for skill: #{skill_id}" if @error_for.include?(skill_id)
 
           @responses.fetch(skill_id, @default_response)
         end

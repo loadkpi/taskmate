@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
     "rubygems_mfa_required" => "true"
   }
 
-  spec.required_ruby_version = ">= 4.0"
+  spec.required_ruby_version = ">= 3.3"
 
   spec.files = Dir[
     "lib/**/*.rb",
@@ -39,5 +39,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "pastel", "~> 0.8"
   spec.add_dependency "thor", "~> 1.3"
   spec.add_dependency "tty-prompt", "~> 0.23"
+  spec.add_dependency "tty-spinner", "~> 0.9"
   spec.add_dependency "tty-table", "~> 0.12"
 end

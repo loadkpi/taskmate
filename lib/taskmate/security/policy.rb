@@ -7,7 +7,7 @@ require "taskmate/security/audit_writer"
 module Taskmate
   module Security
     class Policy
-      def initialize(workspace_path:, consent_manager: nil, action_gate: nil,
+      def initialize(workspace_path:, consent_manager: nil, action_gate: nil, # rubocop:disable Metrics/ParameterLists
                      audit_writer: nil, redactor: nil, classifier: nil,
                      non_interactive: false)
         @workspace_path  = workspace_path

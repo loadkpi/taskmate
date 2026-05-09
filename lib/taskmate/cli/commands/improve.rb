@@ -17,8 +17,8 @@ module Taskmate
 
           result = Core::ImproveIssue.new(
             workspace_path: workspace_path,
-            skill_runner:   runner,
-            action_gate:    gate
+            skill_runner: runner,
+            action_gate: gate
           ).call(key,
                  instruction: @options[:instruction],
                  output_path: @options[:output])
@@ -33,14 +33,18 @@ module Taskmate
         private
 
         def build_runner(workspace_path)
-          require "taskmate/ai/providers/fake_provider"
-          policy  = Security::Policy.new(workspace_path: workspace_path)
-          provider = AI::Providers::FakeProvider.new(
-            default_response: "<!-- Improved content would go here (no AI provider configured) -->\n"
-          )
+          require "taskmate/ai/client"
+          require "taskmate/doctor/checks/config_reader"
+          extend Taskmate::Doctor::Checks::ConfigReader
+
+          config   = load_workspace_config(workspace_path)
+          config   = {} unless config.is_a?(Hash)
+          policy   = Security::Policy.new(workspace_path: workspace_path)
+          provider = AI::Client.from_config(config)
+
           Skills::Runner.new(
-            workspace_path:  workspace_path,
-            ai_provider:     provider,
+            workspace_path: workspace_path,
+            ai_provider: provider,
             security_policy: policy
           )
         end

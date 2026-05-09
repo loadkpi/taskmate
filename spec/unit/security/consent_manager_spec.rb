@@ -6,8 +6,8 @@ RSpec.describe Taskmate::Security::ConsentManager do
   let(:context) do
     described_class::ConsentContext.new(
       provider: "openai",
-      model:    "gpt-4o",
-      files:    ["issues/SAR-1.md"],
+      model: "gpt-4o",
+      files: ["issues/SAR-1.md"],
       sections: ["body (safe)"],
       excluded_paths: []
     )

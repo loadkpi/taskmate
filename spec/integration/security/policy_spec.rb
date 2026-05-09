@@ -16,7 +16,7 @@ RSpec.describe Taskmate::Security::Policy do
     context "with safe content and FakeConsentManager(:allow)" do
       let(:policy) do
         described_class.new(
-          workspace_path:  workspace,
+          workspace_path: workspace,
           consent_manager: Taskmate::Security::FakeConsentManager.new(response: :allow)
         )
       end
@@ -30,7 +30,7 @@ RSpec.describe Taskmate::Security::Policy do
     context "with safe content and FakeConsentManager(:deny)" do
       let(:policy) do
         described_class.new(
-          workspace_path:  workspace,
+          workspace_path: workspace,
           consent_manager: Taskmate::Security::FakeConsentManager.new(response: :deny)
         )
       end
@@ -44,7 +44,7 @@ RSpec.describe Taskmate::Security::Policy do
     context "when secrets are detected" do
       let(:policy) do
         described_class.new(
-          workspace_path:  workspace,
+          workspace_path: workspace,
           consent_manager: Taskmate::Security::FakeConsentManager.new(response: :allow)
         )
       end
@@ -58,7 +58,7 @@ RSpec.describe Taskmate::Security::Policy do
     context "when issue is in excluded path" do
       let(:policy) do
         described_class.new(
-          workspace_path:  workspace,
+          workspace_path: workspace,
           consent_manager: Taskmate::Security::FakeConsentManager.new(response: :allow)
         )
       end

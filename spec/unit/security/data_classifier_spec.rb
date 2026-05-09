@@ -4,17 +4,17 @@ require "taskmate/workspace/issue_file"
 require "taskmate/workspace/ignore_rules"
 
 RSpec.describe Taskmate::Security::DataClassifier do
+  subject(:classifier) { described_class.new(workspace_path: tmpdir, ignore_rules: ignore_rules) }
+
   let(:tmpdir) { Dir.mktmpdir }
+  let(:ignore_rules) { Taskmate::Workspace::IgnoreRules.new("") }
+
   after { FileUtils.rm_rf(tmpdir) }
 
   def build_issue(body:, key: "SAR-1", summary: "Test issue", path: nil)
     fm = { "key" => key, "summary" => summary, "issue_type" => "Task" }
-    issue = Taskmate::Workspace::IssueFile.build(frontmatter: fm, body: body, path: path)
-    issue
+    Taskmate::Workspace::IssueFile.build(frontmatter: fm, body: body, path: path)
   end
-
-  let(:ignore_rules) { Taskmate::Workspace::IgnoreRules.new("") }
-  subject(:classifier) { described_class.new(workspace_path: tmpdir, ignore_rules: ignore_rules) }
 
   describe "#classify" do
     context "with ordinary issue body" do

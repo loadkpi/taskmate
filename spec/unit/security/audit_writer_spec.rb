@@ -34,12 +34,16 @@ RSpec.describe Taskmate::Security::AuditWriter do
       expect(data).to be_a(Hash)
     end
 
-    it "includes expected fields in YAML" do
+    it "includes type, fields, and confirmation flags in YAML" do
       data = YAML.safe_load_file(path)
       expect(data["type"]).to eq("action_audit")
       expect(data["fields_changed"]).to eq(%w[status priority])
       expect(data["user_confirmed"]).to be(true)
       expect(data["dry_run"]).to be(false)
+    end
+
+    it "includes issue_key and warnings in YAML" do
+      data = YAML.safe_load_file(path)
       expect(data["issue_key"]).to eq("SAR-1")
       expect(data["warnings"]).to eq(["read-only field skipped"])
     end
@@ -73,11 +77,15 @@ RSpec.describe Taskmate::Security::AuditWriter do
       expect(name).to match(/\A\d{13}-ai-[0-9a-f]{8}\.yml\z/)
     end
 
-    it "includes expected fields in YAML" do
+    it "includes type, skill, and provider in YAML" do
       data = YAML.safe_load_file(path)
       expect(data["type"]).to eq("ai_call_audit")
       expect(data["skill"]).to eq("suggest_fix")
       expect(data["provider"]).to eq("openai")
+    end
+
+    it "includes model, prompt_hash, and issue_key in YAML" do
+      data = YAML.safe_load_file(path)
       expect(data["model"]).to eq("gpt-4o")
       expect(data["prompt_hash"]).to eq("sha256:abc123")
       expect(data["issue_key"]).to eq("SAR-2")

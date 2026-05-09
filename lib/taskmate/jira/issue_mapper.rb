@@ -33,17 +33,17 @@ module Taskmate
 
       def build_frontmatter(key, fields)
         {
-          "key"          => key,
-          "summary"      => fields["summary"].to_s,
-          "status"       => extract_status(fields),
-          "priority"     => extract_priority(fields),
-          "issue_type"   => extract_issue_type(fields),
-          "labels"       => Array(fields["labels"]),
-          "components"   => extract_components(fields),
-          "assignee"     => extract_user(fields["assignee"]),
-          "reporter"     => extract_user(fields["reporter"]),
+          "key" => key,
+          "summary" => fields["summary"].to_s,
+          "status" => extract_status(fields),
+          "priority" => extract_priority(fields),
+          "issue_type" => extract_issue_type(fields),
+          "labels" => Array(fields["labels"]),
+          "components" => extract_components(fields),
+          "assignee" => extract_user(fields["assignee"]),
+          "reporter" => extract_user(fields["reporter"]),
           "story_points" => extract_story_points(fields),
-          "due_date"     => fields["duedate"]
+          "due_date" => fields["duedate"]
         }.compact
       end
 
@@ -67,9 +67,9 @@ module Taskmate
         return nil if user_hash.nil?
 
         {
-          "account_id"   => user_hash["accountId"],
+          "account_id" => user_hash["accountId"],
           "display_name" => user_hash["displayName"],
-          "email"        => user_hash["emailAddress"]
+          "email" => user_hash["emailAddress"]
         }.compact
       end
 
