@@ -11,9 +11,8 @@ RSpec.describe "Markdown → ADF golden file tests" do
   md_files = Dir[File.join(fixtures_dir, "*.md")]
 
   md_files.each do |md_path|
-    name = File.basename(md_path, ".md")
-
-    it "converts #{name}.md to expected ADF" do
+    it "converts #{File.basename(md_path, '.md')}.md to expected ADF" do
+      name     = File.basename(md_path, ".md")
       adf_path = File.join(File.expand_path("../../fixtures/md_to_adf", __dir__), "#{name}.adf.json")
       skip "No golden .adf.json for #{name}" unless File.exist?(adf_path)
 

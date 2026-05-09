@@ -11,11 +11,11 @@ module Taskmate
         { "type" => "doc", "version" => ADF_VERSION, "content" => content }
       end
 
-      private
-
       # ---------- Block parsing ----------
 
       Block = Struct.new(:type, :data, keyword_init: true)
+
+      private
 
       def parse_blocks(lines)
         blocks  = []
@@ -89,14 +89,14 @@ module Taskmate
         line.match?(/^\#{1,6}\s|^```|^[-*+]\s|^\d+\.\s|^---+$/)
       end
 
-      def collect_list(lines, i, _kind)
+      def collect_list(lines, idx, _kind)
         items = []
-        while i < lines.size && lines[i].match?(/^([-*+]|\d+\.)\s+/)
-          text = lines[i].sub(/^([-*+]|\d+\.)\s+/, "")
+        while idx < lines.size && lines[idx].match?(/^([-*+]|\d+\.)\s+/)
+          text = lines[idx].sub(/^([-*+]|\d+\.)\s+/, "")
           items << text
-          i += 1
+          idx += 1
         end
-        [items, i]
+        [items, idx]
       end
 
       # ---------- ADF rendering ----------
@@ -105,29 +105,29 @@ module Taskmate
         case block.type
         when :heading
           {
-            "type"    => "heading",
-            "attrs"   => { "level" => block.data[:level] },
+            "type" => "heading",
+            "attrs" => { "level" => block.data[:level] },
             "content" => inline_nodes(block.data[:text])
           }
         when :paragraph
           {
-            "type"    => "paragraph",
+            "type" => "paragraph",
             "content" => inline_nodes(block.data[:text])
           }
         when :bullet_list
           {
-            "type"    => "bulletList",
+            "type" => "bulletList",
             "content" => block.data[:items].map { |t| list_item_node(t) }
           }
         when :ordered_list
           {
-            "type"    => "orderedList",
+            "type" => "orderedList",
             "content" => block.data[:items].map { |t| list_item_node(t) }
           }
         when :code_block
           {
-            "type"    => "codeBlock",
-            "attrs"   => { "language" => block.data[:lang] },
+            "type" => "codeBlock",
+            "attrs" => { "language" => block.data[:lang] },
             "content" => [{ "type" => "text", "text" => block.data[:code] }]
           }
         when :rule
@@ -137,9 +137,9 @@ module Taskmate
 
       def list_item_node(text)
         {
-          "type"    => "listItem",
+          "type" => "listItem",
           "content" => [{
-            "type"    => "paragraph",
+            "type" => "paragraph",
             "content" => inline_nodes(text)
           }]
         }
@@ -172,9 +172,7 @@ module Taskmate
           else
             # Collect plain chars until next special sequence
             plain_end = pos + 1
-            while plain_end < text.length && !text[plain_end..].match?(/\A(\*\*|\*|`|\[)/)
-              plain_end += 1
-            end
+            plain_end += 1 while plain_end < text.length && !text[plain_end..].match?(/\A(\*\*|\*|`|\[)/)
             nodes << text_node(text[pos...plain_end], [])
             pos = plain_end
           end
