@@ -33,13 +33,11 @@ module Taskmate
 
       def match?(pattern, path, basename)
         if pattern.end_with?("/")
-          # Directory pattern: path must contain the directory as a component
+          # Directory pattern: path must start with or contain the directory prefix
           # "attachments/" matches "attachments/file.pdf" but NOT "attachments"
-          dir = pattern.chomp("/")
-          parts = path.split("/")
-          # Must appear as a non-last component (i.e., something follows it)
-          idx = parts.index(dir)
-          idx && idx < parts.length - 1
+          # "issues/private/" matches "issues/private/SAR-1.md"
+          dir_prefix = pattern.chomp("/")
+          path.start_with?("#{dir_prefix}/") || path.include?("/#{dir_prefix}/")
         elsif pattern.include?("/")
           File.fnmatch(pattern, path, File::FNM_PATHNAME | File::FNM_DOTMATCH)
         else
