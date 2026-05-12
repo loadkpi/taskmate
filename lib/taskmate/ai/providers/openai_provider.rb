@@ -8,8 +8,10 @@ module Taskmate
       class OpenAiProvider
         include AiPort
 
-        BASE_URL      = "https://api.openai.com".freeze
-        DEFAULT_MODEL = "gpt-4o".freeze
+        BASE_URL         = "https://api.openai.com".freeze
+        DEFAULT_MODEL    = "gpt-4o".freeze
+        CONNECT_TIMEOUT  = 10   # seconds
+        READ_TIMEOUT     = 120  # AI inference can take time
 
         def initialize(model: nil, api_key: nil)
           @model   = model || DEFAULT_MODEL
@@ -31,8 +33,10 @@ module Taskmate
           end
 
           handle_response(response)
-        rescue Faraday::ConnectionFailed, Faraday::TimeoutError => e
+        rescue Faraday::ConnectionFailed => e
           raise Error, "OpenAI unreachable: #{e.message}"
+        rescue Faraday::TimeoutError => e
+          raise Error, "OpenAI request timed out: #{e.message}"
         end
 
         private
@@ -42,6 +46,8 @@ module Taskmate
             f.headers["Authorization"] = "Bearer #{@api_key}"
             f.headers["Content-Type"]  = "application/json"
             f.headers["Accept"]        = "application/json"
+            f.options.open_timeout     = CONNECT_TIMEOUT
+            f.options.timeout          = READ_TIMEOUT
             f.adapter Faraday.default_adapter
           end
         end

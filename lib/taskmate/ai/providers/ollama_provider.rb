@@ -10,6 +10,8 @@ module Taskmate
 
         DEFAULT_BASE_URL = "http://localhost:11434".freeze
         DEFAULT_MODEL    = "llama3".freeze
+        CONNECT_TIMEOUT  = 10   # seconds
+        READ_TIMEOUT     = 120  # local inference can be slow
 
         def initialize(model: nil, base_url: nil)
           @model    = model || DEFAULT_MODEL
@@ -42,7 +44,8 @@ module Taskmate
           Faraday.new(url: @base_url) do |f|
             f.headers["Content-Type"] = "application/json"
             f.headers["Accept"]       = "application/json"
-            f.options.timeout         = 120 # Ollama can be slow locally
+            f.options.open_timeout    = CONNECT_TIMEOUT
+            f.options.timeout         = READ_TIMEOUT
             f.adapter Faraday.default_adapter
           end
         end

@@ -6,8 +6,10 @@ require "base64"
 module Taskmate
   module Jira
     class Client
-      DEFAULT_MAX_RETRIES = 3
-      API_VERSION         = "rest/api/3".freeze
+      DEFAULT_MAX_RETRIES  = 3
+      API_VERSION          = "rest/api/3".freeze
+      CONNECT_TIMEOUT      = 10  # seconds — TCP handshake
+      READ_TIMEOUT         = 30  # seconds — waiting for response
 
       def initialize(base_url:, email:, api_token:, max_retries: DEFAULT_MAX_RETRIES)
         @base_url = base_url.to_s.chomp("/")
@@ -93,6 +95,8 @@ module Taskmate
           f.headers["Authorization"] = "Basic #{credentials}"
           f.headers["Content-Type"]  = "application/json"
           f.headers["Accept"]        = "application/json"
+          f.options.open_timeout     = CONNECT_TIMEOUT
+          f.options.timeout          = READ_TIMEOUT
           f.adapter Faraday.default_adapter
           # No retry middleware for write operations
         end
@@ -129,6 +133,8 @@ module Taskmate
           f.headers["Authorization"] = "Basic #{credentials}"
           f.headers["Content-Type"]  = "application/json"
           f.headers["Accept"]        = "application/json"
+          f.options.open_timeout     = CONNECT_TIMEOUT
+          f.options.timeout          = READ_TIMEOUT
 
           f.request :retry,
                     max: max_retries,

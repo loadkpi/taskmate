@@ -8,10 +8,12 @@ module Taskmate
       class AnthropicProvider
         include AiPort
 
-        BASE_URL      = "https://api.anthropic.com".freeze
-        API_VERSION   = "2023-06-01".freeze
-        DEFAULT_MODEL = "claude-sonnet-4-6".freeze
-        MAX_TOKENS    = 4096
+        BASE_URL         = "https://api.anthropic.com".freeze
+        API_VERSION      = "2023-06-01".freeze
+        DEFAULT_MODEL    = "claude-sonnet-4-6".freeze
+        MAX_TOKENS       = 4096
+        CONNECT_TIMEOUT  = 10   # seconds
+        READ_TIMEOUT     = 120  # AI inference can take time
 
         def initialize(model: nil, api_key: nil)
           @model   = model || DEFAULT_MODEL
@@ -34,18 +36,22 @@ module Taskmate
           end
 
           handle_response(response)
-        rescue Faraday::ConnectionFailed, Faraday::TimeoutError => e
+        rescue Faraday::ConnectionFailed => e
           raise Error, "Anthropic unreachable: #{e.message}"
+        rescue Faraday::TimeoutError => e
+          raise Error, "Anthropic request timed out: #{e.message}"
         end
 
         private
 
         def build_connection
           Faraday.new(url: BASE_URL) do |f|
-            f.headers["x-api-key"] = @api_key
+            f.headers["x-api-key"]          = @api_key
             f.headers["anthropic-version"]  = API_VERSION
             f.headers["Content-Type"]       = "application/json"
             f.headers["Accept"]             = "application/json"
+            f.options.open_timeout          = CONNECT_TIMEOUT
+            f.options.timeout               = READ_TIMEOUT
             f.adapter Faraday.default_adapter
           end
         end

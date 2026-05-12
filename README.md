@@ -22,7 +22,7 @@ Or add to your Gemfile:
 gem "taskmate"
 ```
 
-Requires Ruby >= 4.0.
+Requires Ruby >= 3.3.
 
 ---
 
