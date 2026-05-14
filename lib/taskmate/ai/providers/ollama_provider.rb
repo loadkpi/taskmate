@@ -33,9 +33,9 @@ module Taskmate
 
           handle_response(response)
         rescue Faraday::ConnectionFailed => e
-          raise Error, "Ollama not reachable at #{@base_url}. Is Ollama running? (#{e.message})"
+          raise AiProviderError, "Ollama not reachable at #{@base_url}. Is Ollama running? (#{e.message})"
         rescue Faraday::TimeoutError => e
-          raise Error, "Ollama request timed out: #{e.message}"
+          raise AiProviderError, "Ollama request timed out: #{e.message}"
         end
 
         private
@@ -56,10 +56,10 @@ module Taskmate
             data = JSON.parse(response.body)
             data["response"].to_s
           else
-            raise Error, "Ollama error (#{response.status}): #{response.body.to_s[0, 200]}"
+            raise AiProviderError, "Ollama error (#{response.status}): #{response.body.to_s[0, 200]}"
           end
         rescue JSON::ParserError => e
-          raise Error, "Ollama returned invalid JSON: #{e.message}"
+          raise AiProviderError, "Ollama returned invalid JSON: #{e.message}"
         end
       end
     end

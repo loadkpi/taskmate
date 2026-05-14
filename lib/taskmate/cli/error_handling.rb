@@ -11,10 +11,13 @@ module Taskmate
       rescue Taskmate::ValidationError => e
         warn "Validation error: #{e.message}"
         exit 2
-      rescue Taskmate::JiraAuthError => e
-        warn "Authentication failed: #{e.message}\nCheck TASKMATE_JIRA_EMAIL and TASKMATE_JIRA_TOKEN."
+      rescue Taskmate::JiraAuthError, Taskmate::AiAuthError => e
+        warn "Authentication failed: #{e.message}"
         exit 4
-      rescue Taskmate::IssueNotFoundError, Taskmate::Error => e
+      rescue Taskmate::JiraWriteError => e
+        warn "Jira write error: #{e.message}"
+        exit 1
+      rescue Taskmate::Error => e
         warn "Error: #{e.message}"
         exit 1
       end

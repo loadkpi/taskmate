@@ -34,9 +34,9 @@ module Taskmate
 
           handle_response(response)
         rescue Faraday::ConnectionFailed => e
-          raise Error, "OpenAI unreachable: #{e.message}"
+          raise AiProviderError, "OpenAI unreachable: #{e.message}"
         rescue Faraday::TimeoutError => e
-          raise Error, "OpenAI request timed out: #{e.message}"
+          raise AiProviderError, "OpenAI request timed out: #{e.message}"
         end
 
         private
@@ -60,12 +60,12 @@ module Taskmate
           when 401, 403
             raise AiAuthError, "OpenAI authentication failed. Check TASKMATE_OPENAI_API_KEY."
           when 429
-            raise Error, "OpenAI rate limit exceeded. Retry later."
+            raise AiProviderError, "OpenAI rate limit exceeded. Retry later."
           else
-            raise Error, "OpenAI API error (#{response.status}): #{response.body.to_s[0, 200]}"
+            raise AiProviderError, "OpenAI API error (#{response.status}): #{response.body.to_s[0, 200]}"
           end
         rescue JSON::ParserError => e
-          raise Error, "OpenAI returned invalid JSON: #{e.message}"
+          raise AiProviderError, "OpenAI returned invalid JSON: #{e.message}"
         end
       end
     end

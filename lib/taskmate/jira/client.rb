@@ -46,7 +46,7 @@ module Taskmate
         response = @conn.get(path, params)
         handle_response(response)
       rescue Faraday::ConnectionFailed, Faraday::TimeoutError => e
-        raise Error, "Jira unreachable: #{e.message}"
+        raise JiraError, "Jira unreachable: #{e.message}"
       end
 
       # Write requests use a separate connection without retry middleware
@@ -71,9 +71,9 @@ module Taskmate
       def handle_write_response(response, method, path)
         case response.status
         when 200..204
-          parse_json(response)
+          parse_json(response, error_class: JiraWriteError)
         when 400
-          raise Error, "Jira validation error (400) for #{method} #{path}: #{response.body.to_s[0, 400]}"
+          raise JiraWriteError, "Jira validation error (400) for #{method} #{path}: #{response.body.to_s[0, 400]}"
         when 401, 403
           raise JiraAuthError, "Jira permission denied (#{response.status}). " \
                                "Check TASKMATE_JIRA_EMAIL and TASKMATE_JIRA_TOKEN."
@@ -114,16 +114,16 @@ module Taskmate
         when 429
           raise JiraRateLimitError, "Jira rate limit exceeded. Retry later."
         else
-          raise Error, "Jira API error (#{response.status}): #{response.body.to_s[0, 200]}"
+          raise JiraError, "Jira API error (#{response.status}): #{response.body.to_s[0, 200]}"
         end
       end
 
-      def parse_json(response)
+      def parse_json(response, error_class: JiraError)
         return {} if response.body.nil? || response.body.empty?
 
         JSON.parse(response.body)
       rescue JSON::ParserError => e
-        raise Error, "Jira returned invalid JSON: #{e.message}"
+        raise error_class, "Jira returned invalid JSON: #{e.message}"
       end
 
       def build_connection(max_retries)

@@ -37,9 +37,9 @@ module Taskmate
 
           handle_response(response)
         rescue Faraday::ConnectionFailed => e
-          raise Error, "Anthropic unreachable: #{e.message}"
+          raise AiProviderError, "Anthropic unreachable: #{e.message}"
         rescue Faraday::TimeoutError => e
-          raise Error, "Anthropic request timed out: #{e.message}"
+          raise AiProviderError, "Anthropic request timed out: #{e.message}"
         end
 
         private
@@ -64,12 +64,12 @@ module Taskmate
           when 401, 403
             raise AiAuthError, "Anthropic authentication failed. Check TASKMATE_ANTHROPIC_API_KEY."
           when 429
-            raise Error, "Anthropic rate limit exceeded. Retry later."
+            raise AiProviderError, "Anthropic rate limit exceeded. Retry later."
           else
-            raise Error, "Anthropic API error (#{response.status}): #{response.body.to_s[0, 200]}"
+            raise AiProviderError, "Anthropic API error (#{response.status}): #{response.body.to_s[0, 200]}"
           end
         rescue JSON::ParserError => e
-          raise Error, "Anthropic returned invalid JSON: #{e.message}"
+          raise AiProviderError, "Anthropic returned invalid JSON: #{e.message}"
         end
       end
     end
