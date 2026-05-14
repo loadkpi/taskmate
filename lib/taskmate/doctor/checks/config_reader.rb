@@ -26,6 +26,26 @@ module Taskmate
         rescue TypeError, NoMethodError
           ""
         end
+
+        # Returns ENV override, then tracker.base_url, then legacy jira.base_url, then "".
+        # Dual-key fallback is kept for backward compatibility with pre-init workspace.yml files.
+        def jira_base_url(config)
+          ENV.fetch("TASKMATE_JIRA_URL",
+                    if config.is_a?(Hash)
+                      safe_dig(config, "tracker", "base_url").then do |v|
+                        v.empty? ? safe_dig(config, "jira", "base_url") : v
+                      end
+                    else
+                      ""
+                    end)
+        end
+
+        # Returns tracker.story_points_field, falling back to legacy jira.story_points_field.
+        def story_points_field(config)
+          return nil unless config.is_a?(Hash)
+
+          config.dig("tracker", "story_points_field") || config.dig("jira", "story_points_field")
+        end
       end
     end
   end

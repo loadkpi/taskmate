@@ -33,11 +33,7 @@ module Taskmate
             jira_client: client,
             security_policy: policy,
             push_config: build_push_config(config),
-            story_points_field: if config.is_a?(Hash)
-                                  config.dig("tracker",
-                                             "story_points_field") || config.dig("jira",
-                                                                                 "story_points_field")
-                                end
+            story_points_field: story_points_field(config)
           ).call(key, dry_run: dry_run)
 
           if fmt == "json"
@@ -75,14 +71,10 @@ module Taskmate
 
         def build_jira_client(config)
           require "taskmate/jira/client"
+          require "taskmate/doctor/checks/config_reader"
+          extend Taskmate::Doctor::Checks::ConfigReader
 
-          base_url = ENV["TASKMATE_JIRA_URL"] || (if config.is_a?(Hash)
-                                                    (config.dig("tracker",
-                                                                "base_url") || config.dig("jira",
-                                                                                          "base_url")).to_s
-                                                  else
-                                                    ""
-                                                  end)
+          base_url = jira_base_url(config)
           email    = ENV["TASKMATE_JIRA_EMAIL"] || ""
           token    = ENV["TASKMATE_JIRA_TOKEN"] || ""
 

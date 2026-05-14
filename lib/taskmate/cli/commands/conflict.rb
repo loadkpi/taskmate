@@ -39,13 +39,7 @@ module Taskmate
           extend Taskmate::Doctor::Checks::ConfigReader
 
           config   = load_workspace_config(workspace_path)
-          base_url = ENV["TASKMATE_JIRA_URL"] || (if config.is_a?(Hash)
-                                                    (config.dig("tracker",
-                                                                "base_url") || config.dig("jira",
-                                                                                          "base_url")).to_s
-                                                  else
-                                                    ""
-                                                  end)
+          base_url = jira_base_url(config)
           email    = ENV["TASKMATE_JIRA_EMAIL"] || ""
           token    = ENV["TASKMATE_JIRA_TOKEN"] || ""
 
