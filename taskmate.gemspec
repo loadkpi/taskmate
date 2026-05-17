@@ -3,8 +3,8 @@ require_relative "lib/taskmate/version"
 Gem::Specification.new do |spec|
   spec.name          = "taskmate"
   spec.version       = Taskmate::VERSION
-  spec.authors       = ["Taskmate Contributors"]
-  spec.email         = []
+  spec.authors       = ["Pavel Kozlov"]
+  spec.email         = ["loadkpi@gmail.com"]
 
   spec.summary       = "Secure-by-default, local-first AI assistant for managing issue tracker tasks"
   spec.description   = "Taskmate turns your issue tracker into a local Git-friendly workspace: " \
