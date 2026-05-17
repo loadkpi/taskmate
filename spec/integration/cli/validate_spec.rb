@@ -99,7 +99,7 @@ RSpec.describe Taskmate::CLI::Commands::Validate do
         data = JSON.parse(output)
 
         expect(data["key"]).to eq("BROKEN-1")
-        expect(data["valid"]).to eq(false)
+        expect(data["valid"]).to be(false)
         expect(data["errors"]).not_to be_empty
         expect(data["errors"].map { |e| e["feature"] }).to include("blockquote", "strikethrough")
       end

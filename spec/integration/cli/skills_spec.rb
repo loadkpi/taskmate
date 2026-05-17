@@ -121,7 +121,7 @@ RSpec.describe Taskmate::CLI::Commands::Skills do
         expect(data["version"]).to eq("1")
         expect(data["kind"]).to eq("task_review")
         expect(data["description"]).to eq("Test skill my-skill")
-        expect(data["requires_ai"]).to eq(true)
+        expect(data["requires_ai"]).to be(true)
         expect(data["inputs"]).to be_an(Array)
         expect(data["outputs"]).to be_an(Array)
       end
@@ -172,7 +172,7 @@ RSpec.describe Taskmate::CLI::Commands::Skills do
 
         entry = data.find { |r| r["id"] == "my-skill" }
         expect(entry).not_to be_nil
-        expect(entry["valid"]).to eq(true)
+        expect(entry["valid"]).to be(true)
         expect(entry["errors"]).to eq([])
       end
     end

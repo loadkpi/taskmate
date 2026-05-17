@@ -110,7 +110,7 @@ RSpec.describe Taskmate::CLI::Commands::Show do
               "display_name" => "Jane Doe",
               "email" => "jane@example.com"
             },
-            "labels" => ["backend", "cli"],
+            "labels" => %w[backend cli],
             "body" => "\nIssue body\n"
           }
         )
@@ -131,7 +131,7 @@ RSpec.describe Taskmate::CLI::Commands::Show do
           "issue_type" => "Task",
           "status" => "To Do",
           "priority" => "Medium",
-          "labels" => ["backend", "cli"],
+          "labels" => %w[backend cli],
           "sync_state" => "clean",
           "jira_source_hash" => "sha256:aaaa",
           "last_synced_local_hash" => "sha256:aaaa",

@@ -95,7 +95,7 @@ RSpec.describe Taskmate::CLI::Commands::Diff do
         data = JSON.parse(capture_stdout { command.call("TEST-1", workspace) })
 
         expect(data["issue_key"]).to eq("TEST-1")
-        expect(data["empty"]).to eq(true)
+        expect(data["empty"]).to be(true)
         expect(data["hunks"]).to eq([])
       end
 
@@ -106,7 +106,7 @@ RSpec.describe Taskmate::CLI::Commands::Diff do
         data = JSON.parse(capture_stdout { command.call("TEST-1", workspace) })
 
         expect(data["issue_key"]).to eq("TEST-1")
-        expect(data["empty"]).to eq(false)
+        expect(data["empty"]).to be(false)
         expect(data["hunks"]).not_to be_empty
       end
     end
