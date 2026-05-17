@@ -17,6 +17,9 @@ module Taskmate
       rescue Taskmate::JiraWriteError => e
         warn "Jira write error: #{e.message}"
         exit 1
+      rescue Taskmate::AiError => e
+        warn "AI error: #{e.message}"
+        exit 1
       rescue Taskmate::Error => e
         warn "Error: #{e.message}"
         exit 1
