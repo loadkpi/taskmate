@@ -6,6 +6,7 @@ module Taskmate
     module Commands
       class Show
         include Taskmate::Rendering::JsonRenderer
+
         def initialize(options = {})
           @options = options
         end

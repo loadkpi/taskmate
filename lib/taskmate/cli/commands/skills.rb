@@ -8,6 +8,7 @@ module Taskmate
     module Commands
       class Skills
         include Taskmate::Rendering::JsonRenderer
+
         VALID_FORMATS = %w[text json].freeze
 
         def initialize(options = {})
@@ -95,9 +96,9 @@ module Taskmate
         end
 
         def validate_json(results)
-          render_json(results.map { |r|
+          render_json(results.map do |r|
             { "id" => r[:skill].id, "valid" => r[:result].valid?, "errors" => r[:result].errors }
-          })
+          end)
         end
 
         def validate_text(results, all_valid)

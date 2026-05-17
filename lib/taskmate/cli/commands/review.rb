@@ -8,6 +8,7 @@ module Taskmate
     module Commands
       class Review
         include Taskmate::Rendering::JsonRenderer
+
         VALID_FORMATS = %w[text json].freeze
 
         def initialize(options = {})

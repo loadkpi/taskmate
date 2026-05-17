@@ -6,6 +6,7 @@ module Taskmate
     module Commands
       class Diff
         include Taskmate::Rendering::JsonRenderer
+
         def initialize(options = {})
           @options = options
         end

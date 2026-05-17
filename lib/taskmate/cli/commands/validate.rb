@@ -6,6 +6,7 @@ module Taskmate
     module Commands
       class Validate
         include Taskmate::Rendering::JsonRenderer
+
         VALID_FORMATS = %w[text json].freeze
 
         def initialize(options = {})
@@ -46,9 +47,9 @@ module Taskmate
           super(
             "key" => result.issue_file.key,
             "valid" => result.valid?,
-            "errors" => result.errors.map { |e|
+            "errors" => result.errors.map do |e|
               { "feature" => e.feature, "line" => e.line_number, "message" => e.message }
-            }
+            end
           )
         end
       end
