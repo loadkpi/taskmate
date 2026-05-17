@@ -1,9 +1,11 @@
 require "taskmate/core/workspace_status"
+require "taskmate/rendering/json_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Workspace
+        include Taskmate::Rendering::JsonRenderer
         VALID_FORMATS = %w[text json].freeze
 
         def initialize(options = {})
@@ -45,8 +47,7 @@ module Taskmate
         end
 
         def render_status_json(result)
-          require "json"
-          puts JSON.pretty_generate(
+          render_json(
             "local_changed" => result.local_changed.map { |i| issue_summary(i) },
             "new_local" => result.new_local.map { |i| issue_summary(i) },
             "clean" => result.clean.map { |i| issue_summary(i) },

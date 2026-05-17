@@ -1,11 +1,13 @@
 require "taskmate/core/pull_issue"
 require "taskmate/core/pull_by_jql"
 require "taskmate/cli/output"
+require "taskmate/rendering/json_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Pull
+        include Taskmate::Rendering::JsonRenderer
         VALID_FORMATS = %w[text json].freeze
 
         def initialize(options = {})
@@ -75,8 +77,7 @@ module Taskmate
         end
 
         def render_single_json(result)
-          require "json"
-          puts JSON.pretty_generate(
+          render_json(
             "key" => result.issue_file.key,
             "path" => result.path,
             "synced_path" => result.synced_path,
@@ -91,8 +92,7 @@ module Taskmate
         end
 
         def render_batch_json(batch)
-          require "json"
-          puts JSON.pretty_generate(
+          render_json(
             "total" => batch.total,
             "pulled" => batch.pulled.map { |r| { "key" => r.issue_file.key, "path" => r.path } },
             "failed" => batch.failed.map { |f| { "key" => f.key, "error" => f.error } }

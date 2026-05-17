@@ -1,9 +1,11 @@
 require "taskmate/core/validate_issue"
+require "taskmate/rendering/json_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Validate
+        include Taskmate::Rendering::JsonRenderer
         VALID_FORMATS = %w[text json].freeze
 
         def initialize(options = {})
@@ -41,8 +43,7 @@ module Taskmate
         end
 
         def render_json(result)
-          require "json"
-          puts JSON.pretty_generate(
+          super(
             "key" => result.issue_file.key,
             "valid" => result.valid?,
             "errors" => result.errors.map { |e|

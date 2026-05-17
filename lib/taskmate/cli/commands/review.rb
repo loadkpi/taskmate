@@ -1,11 +1,13 @@
 require "taskmate/core/review_issue"
 require "taskmate/skills/runner"
 require "taskmate/security/policy"
+require "taskmate/rendering/json_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Review
+        include Taskmate::Rendering::JsonRenderer
         VALID_FORMATS = %w[text json].freeze
 
         def initialize(options = {})
@@ -42,8 +44,7 @@ module Taskmate
         end
 
         def render_json(result)
-          require "json"
-          puts JSON.pretty_generate(
+          super(
             "review_markdown" => result.review_markdown,
             "review_path" => result.review_path,
             "readiness_score" => result.readiness_score

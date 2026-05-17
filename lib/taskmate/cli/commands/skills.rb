@@ -1,11 +1,13 @@
 require "taskmate/skills/registry"
 require "taskmate/skills/loader"
 require "taskmate/skills/differ"
+require "taskmate/rendering/json_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Skills
+        include Taskmate::Rendering::JsonRenderer
         VALID_FORMATS = %w[text json].freeze
 
         def initialize(options = {})
@@ -18,8 +20,7 @@ module Taskmate
           skills   = registry.all
 
           if fmt == "json"
-            require "json"
-            puts JSON.pretty_generate(skills.map { |s| skill_summary(s) })
+            render_json(skills.map { |s| skill_summary(s) })
           elsif skills.empty?
             puts "No skills found in #{workspace_path}/skills/"
           else
@@ -48,8 +49,7 @@ module Taskmate
           result = differ.diff(skill_id)
 
           if fmt == "json"
-            require "json"
-            puts JSON.pretty_generate(
+            render_json(
               "skill_id" => skill_id,
               "status" => result.status.to_s,
               "diff" => result.diff_text
@@ -79,8 +79,7 @@ module Taskmate
         end
 
         def show_json(skill)
-          require "json"
-          puts JSON.pretty_generate(skill_detail(skill))
+          render_json(skill_detail(skill))
         end
 
         def show_text(skill)
@@ -96,8 +95,7 @@ module Taskmate
         end
 
         def validate_json(results)
-          require "json"
-          puts JSON.pretty_generate(results.map { |r|
+          render_json(results.map { |r|
             { "id" => r[:skill].id, "valid" => r[:result].valid?, "errors" => r[:result].errors }
           })
         end

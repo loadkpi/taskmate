@@ -1,9 +1,11 @@
 require "taskmate/core/show_issue"
+require "taskmate/rendering/json_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Show
+        include Taskmate::Rendering::JsonRenderer
         def initialize(options = {})
           @options = options
         end
@@ -49,7 +51,6 @@ module Taskmate
         end
 
         def render_json(issue, metadata)
-          require "json"
           data = if metadata
                    issue.frontmatter.merge(
                      "body" => issue.body,
@@ -66,7 +67,7 @@ module Taskmate
                      "body" => issue.body
                    }
                  end
-          puts JSON.pretty_generate(data)
+          super(data)
         end
 
         def serialize_assignee(assignee)

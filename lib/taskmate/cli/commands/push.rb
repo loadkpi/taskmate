@@ -1,11 +1,13 @@
 require "taskmate/core/push_issue"
 require "taskmate/security/policy"
 require "taskmate/cli/output"
+require "taskmate/rendering/json_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Push
+        include Taskmate::Rendering::JsonRenderer
         VALID_FORMATS = %w[text json].freeze
 
         def initialize(options = {})
@@ -61,8 +63,7 @@ module Taskmate
         end
 
         def render_json(result)
-          require "json"
-          puts JSON.pretty_generate(
+          super(
             "key" => result.issue_file.key,
             "applied" => result.applied,
             "dry_run" => result.dry_run

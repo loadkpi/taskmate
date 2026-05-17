@@ -1,9 +1,11 @@
 require "taskmate/core/diff_issue"
+require "taskmate/rendering/json_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Diff
+        include Taskmate::Rendering::JsonRenderer
         def initialize(options = {})
           @options = options
         end
@@ -37,12 +39,11 @@ module Taskmate
         end
 
         def render_json(diff)
-          require "json"
-          puts JSON.pretty_generate({
-                                      "issue_key" => diff.issue_key,
-                                      "empty" => diff.empty?,
-                                      "hunks" => diff.hunks
-                                    })
+          super(
+            "issue_key" => diff.issue_key,
+            "empty" => diff.empty?,
+            "hunks" => diff.hunks
+          )
         end
       end
     end
