@@ -45,7 +45,6 @@ module Taskmate
 
         build(provider: ai_cfg.provider, model: ai_cfg.model)
       end
-
     end
   end
 end

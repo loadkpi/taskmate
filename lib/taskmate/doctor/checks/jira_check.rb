@@ -17,8 +17,8 @@ module Taskmate
           when :invalid_yaml, :invalid_structure then return skip!("workspace.yml is malformed — skipping Jira check")
           end
 
-          cfg = begin
-            Config::Loader.load(@workspace_path)
+          begin
+            cfg = Config::Loader.load(@workspace_path)
           rescue Taskmate::ConfigError => e
             return fail!("Config invalid: #{e.message}")
           end

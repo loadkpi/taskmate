@@ -25,8 +25,8 @@ module Taskmate
           return fail!("security section missing in workspace.yml") unless security
           return fail!("security section must be a mapping, got #{security.class}") unless security.is_a?(Hash)
 
-          cfg = begin
-            Config::Loader.load(@workspace_path)
+          begin
+            cfg = Config::Loader.load(@workspace_path)
           rescue Taskmate::ConfigError => e
             return fail!("Config invalid: #{e.message}")
           end
