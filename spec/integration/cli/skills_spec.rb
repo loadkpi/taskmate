@@ -5,44 +5,41 @@ require "taskmate/cli/commands/skills"
 RSpec.describe Taskmate::CLI::Commands::Skills do
   let(:workspace) { create_temp_workspace(initialized: true) }
 
-  # A minimal valid skill fixture
-  def write_skill(id:, kind: "task_review", valid: true)
-    content = if valid
-                <<~MD
-                  ---
-                  id: #{id}
-                  version: 1
-                  kind: #{kind}
-                  description: "Test skill #{id}"
-                  requires_ai: true
-                  inputs:
-                    - name: issue_markdown
-                      type: markdown
-                      required: true
-                  outputs:
-                    - name: result_markdown
-                      type: markdown
-                  security:
-                    external_ai: requires_consent
-                    jira_write: false
-                  ---
+  def write_skill(id:, kind: "task_review")
+    write_file(workspace, "skills/#{id}/skill.md", <<~MD)
+      ---
+      id: #{id}
+      version: 1
+      kind: #{kind}
+      description: "Test skill #{id}"
+      requires_ai: true
+      inputs:
+        - name: issue_markdown
+          type: markdown
+          required: true
+      outputs:
+        - name: result_markdown
+          type: markdown
+      security:
+        external_ai: requires_consent
+        jira_write: false
+      ---
 
-                  Skill prompt body for #{id}.
-                MD
-              else
-                # Missing required fields: id, security
-                <<~MD
-                  ---
-                  version: 1
-                  kind: #{kind}
-                  description: "Broken skill"
-                  ---
+      Skill prompt body for #{id}.
+    MD
+  end
 
-                  Prompt body.
-                MD
-              end
+  def write_broken_skill(id:)
+    write_file(workspace, "skills/#{id}/skill.md", <<~MD)
+      ---
+      id: #{id}
+      version: 1
+      kind: task_review
+      description: "Broken skill"
+      ---
 
-    write_file(workspace, "skills/#{id}/skill.md", content)
+      Prompt body.
+    MD
   end
 
   describe "#list" do
@@ -112,7 +109,7 @@ RSpec.describe Taskmate::CLI::Commands::Skills do
     context "with json output" do
       subject(:command) { described_class.new(format: "json") }
 
-      it "returns skill details as json" do
+      it "returns skill identity fields as json" do
         write_skill(id: "my-skill")
 
         data = JSON.parse(capture_stdout { command.show("my-skill", workspace) })
@@ -122,8 +119,16 @@ RSpec.describe Taskmate::CLI::Commands::Skills do
         expect(data["kind"]).to eq("task_review")
         expect(data["description"]).to eq("Test skill my-skill")
         expect(data["requires_ai"]).to be(true)
+      end
+
+      it "returns skill inputs, outputs and security as json" do
+        write_skill(id: "my-skill")
+
+        data = JSON.parse(capture_stdout { command.show("my-skill", workspace) })
+
         expect(data["inputs"]).to be_an(Array)
         expect(data["outputs"]).to be_an(Array)
+        expect(data["security"]).to be_a(Hash)
       end
     end
 
@@ -151,7 +156,7 @@ RSpec.describe Taskmate::CLI::Commands::Skills do
       end
 
       it "prints FAIL and exits with status 1 for invalid skills" do
-        write_skill(id: "broken-skill", valid: false)
+        write_broken_skill(id: "broken-skill")
 
         output, exit_error = capture_stdout_and_system_exit { command.validate(workspace) }
 

@@ -65,19 +65,31 @@ RSpec.describe Taskmate::CLI::Commands::Workspace do
         expect(output).to eq("Workspace is empty — no issues found.\n")
       end
 
-      it "prints local_changed, new_local, and clean sections" do
+      it "prints local_changed section with modified issue" do
         write_local_changed_issue(key: "TEST-1", summary: "Changed issue")
-        write_new_local_issue(summary: "Draft task")
-        write_clean_issue(key: "TEST-2", summary: "Clean issue")
 
         output = capture_stdout { command.status(workspace) }
 
         expect(output).to include("Local changes (1):")
         expect(output).to include("M TEST-1")
         expect(output).to include("Changed issue")
+      end
+
+      it "prints new_local section with draft issue" do
+        write_new_local_issue(summary: "Draft task")
+
+        output = capture_stdout { command.status(workspace) }
+
         expect(output).to include("New local (1):")
         expect(output).to include("(new)")
         expect(output).to include("Draft task")
+      end
+
+      it "prints clean section with synced issue" do
+        write_clean_issue(key: "TEST-2", summary: "Clean issue")
+
+        output = capture_stdout { command.status(workspace) }
+
         expect(output).to include("Clean (1):")
         expect(output).to include("TEST-2")
         expect(output).to include("Clean issue")
