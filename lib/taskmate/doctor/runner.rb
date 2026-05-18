@@ -1,4 +1,3 @@
-require "taskmate/doctor/checks/config_reader"
 require "taskmate/doctor/checks/workspace_yml_check"
 require "taskmate/doctor/checks/directories_check"
 require "taskmate/doctor/checks/taskmateignore_check"
