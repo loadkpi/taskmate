@@ -51,6 +51,40 @@ RSpec.describe Taskmate::Jira::MarkdownToAdf do
       end
     end
 
+    context "nested bullet list" do
+      it "produces nested bulletList inside listItem" do
+        adf  = converter.convert("- Apple\n  - Sub A\n  - Sub B\n- Banana\n")
+        list = adf.dig("content", 0)
+        expect(list["type"]).to eq("bulletList")
+
+        first_item    = list.dig("content", 0)
+        nested_list   = first_item.dig("content", 1)
+        expect(nested_list["type"]).to eq("bulletList")
+        expect(nested_list["content"].size).to eq(2)
+        expect(nested_list.dig("content", 0, "content", 0, "content", 0, "text")).to eq("Sub A")
+      end
+
+      it "top-level item without sub-items has no nested list" do
+        adf       = converter.convert("- Apple\n  - Sub A\n- Banana\n")
+        last_item = adf.dig("content", 0, "content", 1)
+        expect(last_item["content"].size).to eq(1)
+        expect(last_item.dig("content", 0, "type")).to eq("paragraph")
+      end
+    end
+
+    context "nested ordered list" do
+      it "produces nested orderedList inside listItem" do
+        adf  = converter.convert("1. First\n   1. Sub one\n2. Second\n")
+        list = adf.dig("content", 0)
+        expect(list["type"]).to eq("orderedList")
+
+        first_item  = list.dig("content", 0)
+        nested_list = first_item.dig("content", 1)
+        expect(nested_list["type"]).to eq("orderedList")
+        expect(nested_list.dig("content", 0, "content", 0, "content", 0, "text")).to eq("Sub one")
+      end
+    end
+
     context "code block" do
       it "converts fenced code block" do
         adf = converter.convert("```ruby\nputs 1\n```\n")
@@ -150,6 +184,23 @@ RSpec.describe Taskmate::Jira::MarkdownToAdf do
       md = "[click](https://example.com)\n"
       result = round_trip(md)
       expect(result).to include("[click](https://example.com)")
+    end
+
+    it "round-trips nested bullet list (stable on second pass)" do
+      md = "- Apple\n  - Sub A\n  - Sub B\n- Banana\n"
+      first  = round_trip(md)
+      second = round_trip(first)
+      expect(second).to include("Sub A")
+      expect(second).to include("Sub B")
+      expect(second).to eq(first)
+    end
+
+    it "round-trips nested ordered list (stable on second pass)" do
+      md = "1. First\n   1. Sub one\n   2. Sub two\n2. Second\n"
+      first  = round_trip(md)
+      second = round_trip(first)
+      expect(second).to include("Sub one")
+      expect(second).to eq(first)
     end
   end
 end

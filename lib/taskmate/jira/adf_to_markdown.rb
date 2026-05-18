@@ -18,7 +18,8 @@ module Taskmate
         return "" if node.nil? || node.empty?
 
         case node["type"]
-        when "doc", "listItem" then render_children(node, separator: "\n")
+        when "doc"      then render_children(node, separator: "\n")
+        when "listItem" then render_children(node)
         when "paragraph"       then render_paragraph(node)
         when "heading"         then render_heading(node)
         when "bulletList"      then render_list(node, ordered: false)
@@ -71,7 +72,7 @@ module Taskmate
           # Indent continuation lines for multi-line items
           lines = content.lines
           first = "#{bullet} #{lines.first&.chomp}"
-          rest  = lines.drop(1).map { |l| "   #{l}" }.join
+          rest  = lines.drop(1).map { |l| "  #{l}" }.join
           "#{first}\n#{rest}"
         end
         items.join

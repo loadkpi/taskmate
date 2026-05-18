@@ -1,0 +1,34 @@
+{
+  "type": "doc",
+  "version": 1,
+  "content": [
+    {
+      "type": "orderedList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            { "type": "paragraph", "content": [{ "type": "text", "text": "First" }] },
+            {
+              "type": "orderedList",
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Sub one" }] }]
+                },
+                {
+                  "type": "listItem",
+                  "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Sub two" }] }]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Second" }] }]
+        }
+      ]
+    }
+  ]
+}

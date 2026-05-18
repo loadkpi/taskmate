@@ -75,12 +75,30 @@ module Taskmate
 
       def collect_list(lines, idx, _kind)
         items = []
-        while idx < lines.size && lines[idx].match?(/^([-*+]|\d+\.)\s+/)
-          text = lines[idx].sub(/^([-*+]|\d+\.)\s+/, "")
-          items << text
+        while idx < lines.size
+          line = lines[idx]
+          break unless (m = line.match(/^([-*+]|\d+\.)\s+(.*)/))
+
           idx += 1
+          sub_items, sub_kind, idx = collect_indented_items(lines, idx)
+          sub_list = sub_items.empty? ? nil : { kind: sub_kind, items: sub_items }
+          items << { text: m[2], sub_list: sub_list }
         end
         [items, idx]
+      end
+
+      def collect_indented_items(lines, idx)
+        items = []
+        kind  = :bullet
+        while idx < lines.size
+          line = lines[idx]
+          break unless (m = line.match(/^\s{2,}([-*+]|\d+\.)\s+(.*)/))
+
+          kind  = m[1].match?(/\d+\./) ? :ordered : :bullet
+          items << { text: m[2], sub_list: nil }
+          idx  += 1
+        end
+        [items, kind, idx]
       end
 
       # ---------- ADF rendering ----------
@@ -110,14 +128,21 @@ module Taskmate
           "content" => [{ "type" => "text", "text" => block.data[:code] }] }
       end
 
-      def list_item_node(text)
-        {
-          "type" => "listItem",
-          "content" => [{
-            "type" => "paragraph",
-            "content" => inline_nodes(text)
-          }]
-        }
+      def list_item_node(item)
+        text    = item.is_a?(Hash) ? item[:text]     : item
+        sub_list = item.is_a?(Hash) ? item[:sub_list] : nil
+
+        content = [{ "type" => "paragraph", "content" => inline_nodes(text) }]
+
+        if sub_list
+          list_type = sub_list[:kind] == :ordered ? "orderedList" : "bulletList"
+          content << {
+            "type" => list_type,
+            "content" => sub_list[:items].map { |si| list_item_node(si) }
+          }
+        end
+
+        { "type" => "listItem", "content" => content }
       end
 
       # ---------- Inline parsing ----------
