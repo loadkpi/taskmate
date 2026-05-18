@@ -20,14 +20,14 @@ RSpec.describe Taskmate::Rendering::DiffRenderer do
 
     it "colorizes added lines with green" do
       pastel = double("pastel")
-      expect(pastel).to receive(:green).with("+added line").and_return("GREEN:+added line")
+      allow(pastel).to receive(:green).with("+added line").and_return("GREEN:+added line")
       result = described_class.render("+added line\n", pastel: pastel)
       expect(result).to eq("GREEN:+added line\n")
     end
 
     it "colorizes removed lines with red" do
       pastel = double("pastel")
-      expect(pastel).to receive(:red).with("-removed line").and_return("RED:-removed line")
+      allow(pastel).to receive(:red).with("-removed line").and_return("RED:-removed line")
       result = described_class.render("-removed line\n", pastel: pastel)
       expect(result).to eq("RED:-removed line\n")
     end

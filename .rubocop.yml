@@ -67,3 +67,6 @@ RSpec/MessageSpies:
 
 RSpec/ContextWording:
   Enabled: false
+
+RSpec/VerifiedDoubles:
+  Enabled: false

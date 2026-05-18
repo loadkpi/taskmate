@@ -98,7 +98,7 @@ RSpec.describe "End-to-end with init-generated config", type: :integration do
   # ─── Full workflow ────────────────────────────────────────────────────────
 
   describe "pull → validate → diff → push using init-generated config" do
-    it "completes all steps successfully" do # rubocop:disable RSpec/MultipleExpectations
+    it "completes all steps successfully" do
       # Step 1: Pull issue
       pull_result = Taskmate::Core::PullIssue.new(
         workspace_path: workspace,

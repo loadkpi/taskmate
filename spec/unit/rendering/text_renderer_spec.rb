@@ -8,14 +8,11 @@ RSpec.describe Taskmate::Rendering::TextRenderer do
 
   # -- helpers --
 
-  def make_issue(key: "FOO-1", summary: "Summary", status: "Open",
+  def make_issue(**opts)
+    defaults = { key: "FOO-1", summary: "Summary", status: "Open",
                  priority: "High", issue_type: "Story", assignee: nil,
-                 labels: [], body: "Body text", frontmatter: {})
-    double("issue_file",
-           key: key, summary: summary, status: status,
-           priority: priority, issue_type: issue_type,
-           assignee: assignee, labels: labels,
-           body: body, frontmatter: frontmatter)
+                 labels: [], body: "Body text", frontmatter: {} }
+    double("issue_file", **defaults.merge(opts))
   end
 
   def make_assignee(display_name: "Alice")
@@ -197,7 +194,7 @@ RSpec.describe Taskmate::Rendering::TextRenderer do
       r1 = double("r", issue_file: make_issue(key: "FOO-1"), path: "/p1")
       r2 = double("r", issue_file: make_issue(key: "FOO-2"), path: "/p2")
       batch = double("batch", total: 2, pulled: [r1, r2], failed: [])
-      expect { renderer.render_pull_batch_text(batch) }.to output(/Pulled 2\/2 issues/).to_stdout
+      expect { renderer.render_pull_batch_text(batch) }.to output(%r{Pulled 2/2 issues}).to_stdout
     end
 
     it "prints failures to stderr" do

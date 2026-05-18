@@ -14,9 +14,9 @@ module Taskmate
 
         def colorize_line(line, pastel)
           if line.start_with?("+") && !line.start_with?("+++")
-            pastel.green(line.chomp) + "\n"
+            "#{pastel.green(line.chomp)}\n"
           elsif line.start_with?("-") && !line.start_with?("---")
-            pastel.red(line.chomp) + "\n"
+            "#{pastel.red(line.chomp)}\n"
           else
             line
           end
