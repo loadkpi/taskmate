@@ -18,13 +18,14 @@ module Taskmate
       READ_ONLY_FIELDS = %w[status assignee reporter created updated].freeze
 
       def initialize(workspace_path:, jira_client:, security_policy:,
-                     push_config: {}, story_points_field: nil)
+                     push_config: {}, story_points_field: nil, default_project: nil)
         @workspace_path     = workspace_path
         @jira_client        = jira_client
         @security_policy    = security_policy
         @payload_builder    = Jira::PayloadBuilder.new(
           push_config: push_config,
-          story_points_field: story_points_field
+          story_points_field: story_points_field,
+          default_project: default_project
         )
         @conflict_detector  = Jira::ConflictDetector.new(story_points_field: story_points_field)
         @mapper             = Jira::IssueMapper.new(story_points_field: story_points_field)

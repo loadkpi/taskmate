@@ -34,7 +34,8 @@ module Taskmate
             jira_client: client,
             security_policy: policy,
             push_config: build_push_config(cfg.push),
-            story_points_field: cfg.tracker.story_points_field
+            story_points_field: cfg.tracker.story_points_field,
+            default_project: cfg.tracker.default_project
           ).call(key, dry_run: dry_run)
 
           if fmt == "json"

@@ -5,9 +5,10 @@ module Taskmate
   module Jira
     class PayloadBuilder
       # push_config: from workspace.yml push section (hash of allowed fields)
-      def initialize(push_config: {}, story_points_field: nil)
+      def initialize(push_config: {}, story_points_field: nil, default_project: nil)
         @push_config        = push_config || {}
         @story_points_field = story_points_field
+        @default_project    = default_project.to_s
         @converter          = MarkdownToAdf.new
         @back_converter     = AdfToMarkdown.new
       end
@@ -15,6 +16,7 @@ module Taskmate
       # Build payload for creating a new issue (POST /rest/api/3/issue)
       def build_create(issue_file)
         fields = {}
+        fields["project"] = { "key" => @default_project } unless @default_project.empty?
         fields["summary"] = issue_file.summary if allow?("summary")
         fields["issuetype"] = { "name" => issue_file.issue_type } if issue_file.issue_type
         fields["description"] = adf(issue_file.body) if allow?("description")

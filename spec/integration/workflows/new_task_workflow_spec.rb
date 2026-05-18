@@ -57,6 +57,24 @@ RSpec.describe "New task workflow", type: :integration do # rubocop:disable RSpe
     )
   end
 
+  it "includes project key in create payload when default_project is set" do
+    create_result = Taskmate::Core::CreateLocalTask.new(
+      workspace_path: workspace,
+      skill_runner: skill_runner,
+      action_gate: fake_action_gate
+    ).call("Add password reset feature")
+
+    Taskmate::Core::PushIssue.new(
+      workspace_path: workspace,
+      jira_client: jira_client,
+      security_policy: fake_policy,
+      default_project: "MYPROJ"
+    ).call(create_result.path)
+
+    created_payload = jira_client.created_issues.first["payload"]
+    expect(created_payload["fields"]["project"]).to eq({ "key" => "MYPROJ" })
+  end
+
   it "creates a local task and pushes it to Jira" do # rubocop:disable RSpec/ExampleLength,RSpec/MultipleExpectations
     # Step 1: Create local task
     create_result = Taskmate::Core::CreateLocalTask.new(
