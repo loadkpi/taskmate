@@ -68,6 +68,8 @@ RSpec.describe Taskmate::Config::Loader do
     end
 
     context "with workspace.yml containing tracker config" do
+      subject(:cfg) { described_class.load(workspace, env: {}) }
+
       before do
         write_workspace_yml(<<~YAML)
           tracker:
@@ -76,8 +78,6 @@ RSpec.describe Taskmate::Config::Loader do
             story_points_field: customfield_10028
         YAML
       end
-
-      subject(:cfg) { described_class.load(workspace, env: {}) }
 
       it "reads tracker.base_url" do
         expect(cfg.tracker.base_url).to eq("https://mycompany.atlassian.net")
@@ -124,6 +124,8 @@ RSpec.describe Taskmate::Config::Loader do
     end
 
     context "with legacy jira.* keys in workspace.yml" do
+      subject(:cfg) { described_class.load(workspace, env: {}) }
+
       before do
         write_workspace_yml(<<~YAML)
           jira:
@@ -132,8 +134,6 @@ RSpec.describe Taskmate::Config::Loader do
             story_points_field: customfield_99
         YAML
       end
-
-      subject(:cfg) { described_class.load(workspace, env: {}) }
 
       it "falls back to jira.base_url when tracker.base_url is absent" do
         expect(cfg.tracker.base_url).to eq("https://legacy.atlassian.net")
@@ -149,6 +149,8 @@ RSpec.describe Taskmate::Config::Loader do
     end
 
     context "with ai config" do
+      subject(:cfg) { described_class.load(workspace, env: {}) }
+
       before do
         write_workspace_yml(<<~YAML)
           ai:
@@ -157,8 +159,6 @@ RSpec.describe Taskmate::Config::Loader do
             enabled: true
         YAML
       end
-
-      subject(:cfg) { described_class.load(workspace, env: {}) }
 
       it "reads ai.provider" do
         expect(cfg.ai.provider).to eq("anthropic")
@@ -174,6 +174,8 @@ RSpec.describe Taskmate::Config::Loader do
     end
 
     context "with push.allowed_fields configured" do
+      subject(:cfg) { described_class.load(workspace, env: {}) }
+
       before do
         write_workspace_yml(<<~YAML)
           push:
@@ -183,14 +185,14 @@ RSpec.describe Taskmate::Config::Loader do
         YAML
       end
 
-      subject(:cfg) { described_class.load(workspace, env: {}) }
-
       it "reads push.allowed_fields" do
         expect(cfg.push.allowed_fields).to eq(%w[summary description])
       end
     end
 
     context "with security section" do
+      subject(:cfg) { described_class.load(workspace, env: {}) }
+
       before do
         write_workspace_yml(<<~YAML)
           security:
@@ -200,8 +202,6 @@ RSpec.describe Taskmate::Config::Loader do
         YAML
       end
 
-      subject(:cfg) { described_class.load(workspace, env: {}) }
-
       it "reads security flags" do
         expect(cfg.security.require_consent_for_ai).to be(false)
         expect(cfg.security.require_confirm_for_push).to be(true)
@@ -210,6 +210,8 @@ RSpec.describe Taskmate::Config::Loader do
     end
 
     context "with legacy ai.default_provider key" do
+      subject(:cfg) { described_class.load(workspace, env: {}) }
+
       before do
         write_workspace_yml(<<~YAML)
           ai:
@@ -217,8 +219,6 @@ RSpec.describe Taskmate::Config::Loader do
             default_model: gpt-4o
         YAML
       end
-
-      subject(:cfg) { described_class.load(workspace, env: {}) }
 
       it "falls back to ai.default_provider" do
         expect(cfg.ai.provider).to eq("openai")

@@ -31,12 +31,12 @@ module Taskmate
           []
         end
 
-        def ai_errors(ai)
-          return ["ai must be a Hash"] unless ai.is_a?(Hash)
+        def ai_errors(ai_cfg)
+          return ["ai must be a Hash"] unless ai_cfg.is_a?(Hash)
 
           errs = []
-          if ai.key?("provider")
-            provider = ai["provider"].to_s
+          if ai_cfg.key?("provider")
+            provider = ai_cfg["provider"].to_s
             unless VALID_AI_PROVIDERS.include?(provider)
               errs << "ai.provider '#{provider}' is invalid. Valid: #{VALID_AI_PROVIDERS.join(', ')}"
             end
@@ -59,10 +59,8 @@ module Taskmate
           return ["push must be a Hash"] unless push.is_a?(Hash)
 
           errs = []
-          if push.key?("allowed_fields")
-            unless push["allowed_fields"].is_a?(Array)
-              errs << "push.allowed_fields must be an Array"
-            end
+          if push.key?("allowed_fields") && !push["allowed_fields"].is_a?(Array)
+            errs << "push.allowed_fields must be an Array"
           end
           errs
         end
