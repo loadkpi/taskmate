@@ -1,11 +1,13 @@
 require "taskmate/core/show_issue"
 require "taskmate/rendering/json_renderer"
+require "taskmate/rendering/text_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Show
         include Taskmate::Rendering::JsonRenderer
+        include Taskmate::Rendering::TextRenderer
 
         def initialize(options = {})
           @options = options
@@ -38,17 +40,7 @@ module Taskmate
         end
 
         def render_text(issue, metadata)
-          puts "#{issue.key || '(new)'}  #{issue.summary}"
-          puts "Status: #{issue.status}  Priority: #{issue.priority}  Type: #{issue.issue_type}"
-          puts "Assignee: #{issue.assignee&.display_name || '(unassigned)'}"
-          puts "Labels: #{issue.labels.join(', ')}" if issue.labels.any?
-          puts ""
-          puts issue.body
-
-          return unless metadata
-
-          puts "\n--- Metadata ---"
-          issue.frontmatter.each { |k, v| puts "#{k}: #{v}" }
+          render_show_text(issue, metadata: metadata)
         end
 
         def render_json(issue, metadata)

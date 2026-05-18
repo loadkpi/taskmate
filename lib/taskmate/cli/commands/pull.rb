@@ -2,12 +2,14 @@ require "taskmate/core/pull_issue"
 require "taskmate/core/pull_by_jql"
 require "taskmate/cli/output"
 require "taskmate/rendering/json_renderer"
+require "taskmate/rendering/text_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Pull
         include Taskmate::Rendering::JsonRenderer
+        include Taskmate::Rendering::TextRenderer
 
         VALID_FORMATS = %w[text json].freeze
 
@@ -70,11 +72,7 @@ module Taskmate
         end
 
         def render_single_text(result)
-          CLI::Output.success("Pulled #{result.issue_file.key} → #{result.path}")
-          return unless result.unsupported_nodes.any?
-
-          CLI::Output.warn("  Warning: unsupported ADF nodes: #{result.unsupported_nodes.join(', ')}")
-          CLI::Output.warn("  ADF backup saved to #{result.adf_backup_path}")
+          render_pull_single_text(result)
         end
 
         def render_single_json(result)
@@ -88,8 +86,7 @@ module Taskmate
         end
 
         def render_batch_text(batch)
-          puts "Pulled #{batch.pulled.size}/#{batch.total} issues."
-          batch.failed.each { |f| warn "  FAILED #{f.key}: #{f.error}" }
+          render_pull_batch_text(batch)
         end
 
         def render_batch_json(batch)

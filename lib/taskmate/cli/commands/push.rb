@@ -2,12 +2,14 @@ require "taskmate/core/push_issue"
 require "taskmate/security/policy"
 require "taskmate/cli/output"
 require "taskmate/rendering/json_renderer"
+require "taskmate/rendering/text_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Push
         include Taskmate::Rendering::JsonRenderer
+        include Taskmate::Rendering::TextRenderer
 
         VALID_FORMATS = %w[text json].freeze
 
@@ -45,18 +47,7 @@ module Taskmate
         private
 
         def render_text(result)
-          if result.dry_run
-            CLI::Output.info("[DRY RUN] Would push #{result.issue_file.key}")
-            result.action_plan.field_changes.each do |c|
-              CLI::Output.info("  #{c.field}: #{c.from} → #{c.to}")
-            end
-            result.action_plan.warnings.each { |w| CLI::Output.warn("  ! #{w}") }
-          elsif result.applied
-            CLI::Output.success("Pushed #{result.issue_file.key} to Jira.")
-            CLI::Output.info("  Audit: #{result.audit_path}") if result.audit_path
-          else
-            CLI::Output.info("Push cancelled.")
-          end
+          render_push_text(result)
         end
 
         def render_json(result)

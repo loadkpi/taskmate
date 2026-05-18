@@ -1,11 +1,13 @@
 require "taskmate/core/validate_issue"
 require "taskmate/rendering/json_renderer"
+require "taskmate/rendering/text_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Validate
         include Taskmate::Rendering::JsonRenderer
+        include Taskmate::Rendering::TextRenderer
 
         VALID_FORMATS = %w[text json].freeze
 
@@ -33,14 +35,7 @@ module Taskmate
         private
 
         def render_text(result)
-          if result.valid?
-            puts "#{result.issue_file.key}: valid"
-          else
-            puts "#{result.issue_file.key}: #{result.errors.size} error(s)"
-            result.errors.each do |e|
-              puts "  Line #{e.line_number}: #{e.feature} — #{e.message}"
-            end
-          end
+          render_validate_text(result)
         end
 
         def render_json(result)

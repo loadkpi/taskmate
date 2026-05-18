@@ -1,11 +1,13 @@
 require "taskmate/core/diff_issue"
 require "taskmate/rendering/json_renderer"
+require "taskmate/rendering/text_renderer"
 
 module Taskmate
   module CLI
     module Commands
       class Diff
         include Taskmate::Rendering::JsonRenderer
+        include Taskmate::Rendering::TextRenderer
 
         def initialize(options = {})
           @options = options
@@ -30,13 +32,8 @@ module Taskmate
 
         private
 
-        def render_text(diff, key)
-          if diff.empty?
-            puts "No changes in #{key}"
-          else
-            puts "Diff for #{key} (vs last pull):\n\n"
-            puts diff
-          end
+        def render_text(diff, _key)
+          render_diff_text(diff)
         end
 
         def render_json(diff)
