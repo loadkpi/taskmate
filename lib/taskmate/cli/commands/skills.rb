@@ -38,6 +38,7 @@ module Taskmate
         end
 
         def validate(workspace_path = Dir.pwd)
+          validate_format!
           registry  = ::Taskmate::Skills::Registry.new(workspace_path: workspace_path)
           results   = registry.validate_all
           all_valid = results.all? { |r| r[:result].valid? }
@@ -46,6 +47,7 @@ module Taskmate
         end
 
         def diff(skill_id, workspace_path = Dir.pwd)
+          validate_format!
           differ = ::Taskmate::Skills::Differ.new(workspace_path: workspace_path)
           result = differ.diff(skill_id)
 

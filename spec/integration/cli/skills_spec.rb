@@ -181,5 +181,37 @@ RSpec.describe Taskmate::CLI::Commands::Skills do
         expect(entry["errors"]).to eq([])
       end
     end
+
+    context "with invalid format" do
+      subject(:command) { described_class.new(format: "yaml") }
+
+      it "raises ValidationError" do
+        expect { command.validate(workspace) }
+          .to raise_error(Taskmate::ValidationError, /Invalid format/)
+      end
+    end
+  end
+
+  describe "#diff" do
+    context "with text output" do
+      subject(:command) { described_class.new(format: "text") }
+
+      it "reports custom skill status when no built-in exists" do
+        write_skill(id: "my-skill")
+        output = capture_stdout { command.diff("my-skill", workspace) }
+        expect(output).to include("my-skill")
+        expect(output).to include("custom skill")
+      end
+    end
+
+    context "with invalid format" do
+      subject(:command) { described_class.new(format: "yaml") }
+
+      it "raises ValidationError" do
+        write_skill(id: "my-skill")
+        expect { command.diff("my-skill", workspace) }
+          .to raise_error(Taskmate::ValidationError, /Invalid format/)
+      end
+    end
   end
 end
