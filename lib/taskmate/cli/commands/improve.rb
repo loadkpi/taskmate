@@ -36,10 +36,9 @@ module Taskmate
           require "taskmate/ai/client"
           require "taskmate/config"
 
-          raw      = Config::Loader.load_raw(workspace_path)
-          raw      = {} unless raw.is_a?(Hash)
+          cfg      = Config::Loader.load(workspace_path)
           policy   = Security::Policy.new(workspace_path: workspace_path)
-          provider = AI::Client.from_config(raw)
+          provider = AI::Client.from_app_config(cfg)
 
           Skills::Runner.new(
             workspace_path: workspace_path,

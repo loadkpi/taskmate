@@ -24,37 +24,28 @@ module Taskmate
         end
       end
 
-      # Build from workspace.yml config hash
-      def self.from_config(config)
-        ai_config = config.is_a?(Hash) ? (config["ai"] || {}) : {}
+      # Build from a typed AppConfig (Config::AppConfig value object).
+      # ENV overrides are already applied by Config::Loader.load.
+      def self.from_app_config(app_config)
+        ai_cfg = app_config.ai
 
-        if ai_config["enabled"] == false
+        unless ai_cfg.enabled
           require "taskmate/ai/providers/fake_provider"
           return Providers::FakeProvider.new(
             default_response: "AI is disabled in workspace.yml (ai.enabled: false)."
           )
         end
 
-        # Support both canonical keys (from init) and legacy keys
-        provider = ENV["TASKMATE_AI_PROVIDER"] ||
-                   ai_config["provider"] ||
-                   ai_config["default_provider"]
-        provider = provider.to_s
-
-        model = ENV["TASKMATE_AI_MODEL"] ||
-                ai_config["model"] ||
-                ai_config["default_model"]
-        model = model.to_s
-
-        if provider.empty? || provider == "disabled"
+        if ai_cfg.provider.empty? || ai_cfg.provider == "disabled"
           require "taskmate/ai/providers/fake_provider"
           return Providers::FakeProvider.new(
             default_response: "AI is disabled. Set ai.provider in workspace.yml or TASKMATE_AI_PROVIDER env var."
           )
         end
 
-        build(provider: provider, model: model.empty? ? nil : model)
+        build(provider: ai_cfg.provider, model: ai_cfg.model)
       end
+
     end
   end
 end
