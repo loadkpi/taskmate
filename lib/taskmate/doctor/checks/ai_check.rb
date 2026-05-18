@@ -1,5 +1,5 @@
 require "taskmate/doctor/check"
-require "taskmate/doctor/checks/config_reader"
+require "taskmate/config"
 
 module Taskmate
   module Doctor
@@ -7,23 +7,22 @@ module Taskmate
       # Full online AI provider check is added in M6.
       # Here we only report skip/configured status based on workspace.yml.
       class AiCheck < Check
-        include ConfigReader
-
         def initialize(workspace_path:)
           super(name: "AI provider", description: "AI provider is available")
           @workspace_path = workspace_path
         end
 
         def run
-          config = load_workspace_config(@workspace_path)
-          case config
+          raw = Config::Loader.load_raw(@workspace_path)
+          case raw
           when :not_found
             return skip!("workspace.yml not found")
           when :invalid_yaml, :invalid_structure
             return skip!("workspace.yml is malformed — skipping AI check")
           end
 
-          provider = safe_dig(config, "ai", "provider")
+          cfg      = Config::Loader.load(@workspace_path)
+          provider = cfg.ai.provider.to_s
           if provider.empty? || provider == "disabled"
             skip!("AI provider disabled in workspace.yml (online check added in M6)")
           else

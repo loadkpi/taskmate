@@ -102,13 +102,11 @@ module Taskmate
 
         def build_jira_client(workspace_path)
           require "taskmate/jira/client"
-          require "taskmate/doctor/checks/config_reader"
-          extend Taskmate::Doctor::Checks::ConfigReader
 
-          config   = load_workspace_config(workspace_path)
-          base_url = jira_base_url(config)
-          email    = ENV.fetch("TASKMATE_JIRA_EMAIL", "")
-          token    = ENV.fetch("TASKMATE_JIRA_TOKEN", "")
+          cfg = Config::Loader.load(workspace_path)
+          base_url = cfg.tracker.base_url
+          email    = cfg.auth.email
+          token    = cfg.auth.api_token
 
           if base_url.empty? || email.empty? || token.empty?
             raise Taskmate::JiraAuthError,

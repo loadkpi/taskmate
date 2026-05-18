@@ -1,4 +1,5 @@
 require_relative "taskmate/version"
+require_relative "taskmate/config"
 
 module Taskmate
   class Error < StandardError; end

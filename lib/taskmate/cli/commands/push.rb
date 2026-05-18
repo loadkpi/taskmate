@@ -23,20 +23,16 @@ module Taskmate
             raise Taskmate::ValidationError, "Invalid format '#{fmt}'. Valid: #{VALID_FORMATS.join(', ')}"
           end
 
-          require "taskmate/doctor/checks/config_reader"
-          extend Taskmate::Doctor::Checks::ConfigReader
-
-          config = load_workspace_config(workspace_path)
-
-          client  = build_jira_client(config)
-          policy  = Security::Policy.new(workspace_path: workspace_path)
+          cfg    = Config::Loader.load(workspace_path)
+          client = build_jira_client(cfg)
+          policy = Security::Policy.new(workspace_path: workspace_path)
 
           result = Core::PushIssue.new(
             workspace_path: workspace_path,
             jira_client: client,
             security_policy: policy,
-            push_config: build_push_config(config),
-            story_points_field: story_points_field(config)
+            push_config: build_push_config(cfg.push),
+            story_points_field: cfg.tracker.story_points_field
           ).call(key, dry_run: dry_run)
 
           if fmt == "json"
@@ -71,14 +67,12 @@ module Taskmate
           )
         end
 
-        def build_jira_client(config)
+        def build_jira_client(cfg)
           require "taskmate/jira/client"
-          require "taskmate/doctor/checks/config_reader"
-          extend Taskmate::Doctor::Checks::ConfigReader
 
-          base_url = jira_base_url(config)
-          email    = ENV["TASKMATE_JIRA_EMAIL"] || ""
-          token    = ENV["TASKMATE_JIRA_TOKEN"] || ""
+          base_url = cfg.tracker.base_url
+          email    = cfg.auth.email
+          token    = cfg.auth.api_token
 
           if base_url.empty? || email.empty? || token.empty?
             raise Taskmate::JiraAuthError,
@@ -88,20 +82,9 @@ module Taskmate
           Jira::Client.new(base_url: base_url, email: email, api_token: token)
         end
 
-        def build_push_config(config)
-          return default_push_config unless config.is_a?(Hash)
-
-          allowed = Array(config.dig("push", "allowed_fields"))
-          return default_push_config if allowed.empty?
-
+        def build_push_config(push_cfg)
           all_fields = %w[summary description labels components priority]
-          all_fields.to_h { |f| ["allow_#{f}", allowed.include?(f)] }
-        end
-
-        def default_push_config
-          # Fail-closed: when no explicit allowlist is configured, allow the standard safe fields
-          %w[summary description labels components priority]
-            .to_h { |f| ["allow_#{f}", true] }
+          all_fields.to_h { |f| ["allow_#{f}", push_cfg.allowed_fields.include?(f)] }
         end
       end
     end

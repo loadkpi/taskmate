@@ -54,13 +54,12 @@ module Taskmate
 
         def build_runner(workspace_path)
           require "taskmate/ai/client"
-          require "taskmate/doctor/checks/config_reader"
-          extend Taskmate::Doctor::Checks::ConfigReader
+          require "taskmate/config"
 
-          config   = load_workspace_config(workspace_path)
-          config   = {} unless config.is_a?(Hash)
+          raw      = Config::Loader.load_raw(workspace_path)
+          raw      = {} unless raw.is_a?(Hash)
           policy   = Security::Policy.new(workspace_path: workspace_path)
-          provider = AI::Client.from_config(config)
+          provider = AI::Client.from_config(raw)
 
           Skills::Runner.new(
             workspace_path: workspace_path,

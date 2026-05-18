@@ -1,33 +1,33 @@
 require "taskmate/doctor/check"
-require "taskmate/doctor/checks/config_reader"
+require "taskmate/config"
 
 module Taskmate
   module Doctor
     module Checks
       class JiraCheck < Check
-        include ConfigReader
-
         def initialize(workspace_path:)
           super(name: "Jira connectivity", description: "Jira credentials and project are accessible")
           @workspace_path = workspace_path
         end
 
         def run
-          config = load_workspace_config(@workspace_path)
-          case config
+          raw = Config::Loader.load_raw(@workspace_path)
+          case raw
           when :not_found then return skip!("workspace.yml not found")
           when :invalid_yaml, :invalid_structure then return skip!("workspace.yml is malformed — skipping Jira check")
           end
-          check_jira_config(config)
+
+          cfg = Config::Loader.load(@workspace_path)
+          check_jira_config(cfg)
         end
 
         private
 
-        def check_jira_config(config)
-          base_url    = resolve_base_url(config)
-          email       = ENV.fetch("TASKMATE_JIRA_EMAIL", "")
-          api_token   = ENV.fetch("TASKMATE_JIRA_TOKEN", "")
-          project_key = resolve_project_key(config)
+        def check_jira_config(cfg)
+          base_url    = cfg.tracker.base_url
+          email       = cfg.auth.email
+          api_token   = cfg.auth.api_token
+          project_key = cfg.tracker.default_project
 
           return skip!("Jira not configured in workspace.yml and TASKMATE_JIRA_URL not set") if base_url.empty?
           if email.empty? || api_token.empty?
@@ -35,19 +35,6 @@ module Taskmate
           end
 
           check_connectivity(base_url, email, api_token, project_key)
-        end
-
-        def resolve_base_url(config)
-          ENV.fetch("TASKMATE_JIRA_URL",
-                    safe_dig(config, "tracker", "base_url").then do |v|
-                      v.empty? ? safe_dig(config, "jira", "base_url") : v
-                    end)
-        end
-
-        def resolve_project_key(config)
-          safe_dig(config, "tracker", "default_project").then do |v|
-            v.empty? ? safe_dig(config, "jira", "default_project") : v
-          end
         end
 
         def check_connectivity(base_url, email, api_token, project_key)

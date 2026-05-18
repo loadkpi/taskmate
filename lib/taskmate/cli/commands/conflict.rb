@@ -35,13 +35,12 @@ module Taskmate
 
         def build_jira_client(workspace_path)
           require "taskmate/jira/client"
-          require "taskmate/doctor/checks/config_reader"
-          extend Taskmate::Doctor::Checks::ConfigReader
+          require "taskmate/config"
 
-          config   = load_workspace_config(workspace_path)
-          base_url = jira_base_url(config)
-          email    = ENV["TASKMATE_JIRA_EMAIL"] || ""
-          token    = ENV["TASKMATE_JIRA_TOKEN"] || ""
+          cfg      = Config::Loader.load(workspace_path)
+          base_url = cfg.tracker.base_url
+          email    = cfg.auth.email
+          token    = cfg.auth.api_token
 
           raise Taskmate::JiraAuthError, "Missing Jira credentials." if base_url.empty? || email.empty? || token.empty?
 
