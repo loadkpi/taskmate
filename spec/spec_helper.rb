@@ -1,12 +1,9 @@
-begin
-  require "simplecov"
-  SimpleCov.start do
-    add_filter "/spec/"
-    track_files "lib/**/*.rb"
-    minimum_coverage 80
-  end
-rescue LoadError
-  # simplecov not installed — skip coverage
+require "simplecov"
+
+SimpleCov.start do
+  add_filter "/spec/"
+  track_files "lib/**/*.rb"
+  minimum_coverage 80
 end
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
