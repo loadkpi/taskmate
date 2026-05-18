@@ -18,7 +18,7 @@ RSpec.describe Taskmate::Jira::AdfToMarkdown do
   end
 
   describe "golden file tests" do
-    %w[headings paragraph lists marks code_block unsupported].each do |fixture|
+    %w[headings paragraph lists nested_lists marks code_block unsupported].each do |fixture|
       it "converts #{fixture} correctly" do
         result = converter.convert(adf(fixture))
         expect(result.markdown).to eq(golden(fixture))
@@ -110,6 +110,76 @@ RSpec.describe Taskmate::Jira::AdfToMarkdown do
           ] }
         ] }
         expect(converter.convert(node).markdown).to include("- Item")
+      end
+    end
+
+    context "nested bullet list" do
+      def nested_bullet_doc(parent_text, *child_texts)
+        children = child_texts.map do |t|
+          { "type" => "listItem", "content" => [
+            { "type" => "paragraph", "content" => [{ "type" => "text", "text" => t }] }
+          ] }
+        end
+        { "type" => "doc", "content" => [
+          { "type" => "bulletList", "content" => [
+            { "type" => "listItem", "content" => [
+              { "type" => "paragraph", "content" => [{ "type" => "text", "text" => parent_text }] },
+              { "type" => "bulletList", "content" => children }
+            ] }
+          ] }
+        ] }
+      end
+
+      it "indents nested bullet items by two spaces" do
+        md = converter.convert(nested_bullet_doc("Parent", "Child")).markdown
+        expect(md).to include("- Parent\n  - Child")
+      end
+
+      it "indents multiple nested bullet items" do
+        md = converter.convert(nested_bullet_doc("Parent", "A", "B")).markdown
+        expect(md).to include("  - A\n  - B")
+      end
+    end
+
+    context "nested ordered list" do
+      def nested_ordered_doc(parent_text, *child_texts)
+        children = child_texts.map do |t|
+          { "type" => "listItem", "content" => [
+            { "type" => "paragraph", "content" => [{ "type" => "text", "text" => t }] }
+          ] }
+        end
+        { "type" => "doc", "content" => [
+          { "type" => "orderedList", "content" => [
+            { "type" => "listItem", "content" => [
+              { "type" => "paragraph", "content" => [{ "type" => "text", "text" => parent_text }] },
+              { "type" => "orderedList", "content" => children }
+            ] }
+          ] }
+        ] }
+      end
+
+      it "indents nested ordered items by three spaces" do
+        md = converter.convert(nested_ordered_doc("Step", "Sub")).markdown
+        expect(md).to include("1. Step\n   1. Sub")
+      end
+    end
+
+    context "mixed nested list" do
+      it "indents ordered items nested under a bullet item using the bullet continuation indent" do
+        node = { "type" => "doc", "content" => [
+          { "type" => "bulletList", "content" => [
+            { "type" => "listItem", "content" => [
+              { "type" => "paragraph", "content" => [{ "type" => "text", "text" => "Tasks" }] },
+              { "type" => "orderedList", "content" => [
+                { "type" => "listItem", "content" => [
+                  { "type" => "paragraph", "content" => [{ "type" => "text", "text" => "First" }] }
+                ] }
+              ] }
+            ] }
+          ] }
+        ] }
+        md = converter.convert(node).markdown
+        expect(md).to include("- Tasks\n  1. First")
       end
     end
 

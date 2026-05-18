@@ -68,12 +68,13 @@ module Taskmate
       def render_list(node, ordered:)
         items = Array(node["content"]).each_with_index.map do |item, idx|
           bullet  = ordered ? "#{idx + 1}." : "-"
+          indent  = " " * (bullet.length + 1)
           content = render_node(item).chomp
-          # Indent continuation lines for multi-line items
-          lines = content.lines
-          first = "#{bullet} #{lines.first&.chomp}"
-          rest  = lines.drop(1).map { |l| "  #{l}" }.join
-          "#{first}\n#{rest}"
+          lines   = content.lines
+          first   = "#{bullet} #{lines.first&.chomp}"
+          rest    = lines.drop(1).map { |l| "#{indent}#{l}" }.join
+          result  = "#{first}\n#{rest}"
+          result.end_with?("\n") ? result : "#{result}\n"
         end
         items.join
       end

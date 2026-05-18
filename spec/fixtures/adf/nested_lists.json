@@ -1,0 +1,62 @@
+{
+  "type": "doc",
+  "version": 1,
+  "content": [
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            { "type": "paragraph", "content": [{ "type": "text", "text": "Fruit" }] },
+            {
+              "type": "bulletList",
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Apple" }] }]
+                },
+                {
+                  "type": "listItem",
+                  "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Banana" }] }]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Veggie" }] }]
+        }
+      ]
+    },
+    {
+      "type": "orderedList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            { "type": "paragraph", "content": [{ "type": "text", "text": "Step A" }] },
+            {
+              "type": "orderedList",
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Sub 1" }] }]
+                },
+                {
+                  "type": "listItem",
+                  "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Sub 2" }] }]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Step B" }] }]
+        }
+      ]
+    }
+  ]
+}
