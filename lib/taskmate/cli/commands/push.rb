@@ -27,7 +27,7 @@ module Taskmate
 
           cfg    = Config::Loader.load(workspace_path)
           client = build_jira_client(cfg)
-          policy = Security::Policy.new(workspace_path: workspace_path)
+          policy = Security::Policy.new(workspace_path: workspace_path, security_config: cfg.security)
 
           result = Core::PushIssue.new(
             workspace_path: workspace_path,

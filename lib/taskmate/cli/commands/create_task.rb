@@ -35,7 +35,7 @@ module Taskmate
           require "taskmate/config"
 
           cfg      = Config::Loader.load(workspace_path)
-          policy   = Security::Policy.new(workspace_path: workspace_path)
+          policy   = Security::Policy.new(workspace_path: workspace_path, security_config: cfg.security)
           provider = AI::Client.from_app_config(cfg)
 
           Skills::Runner.new(
