@@ -9,11 +9,10 @@ RSpec.describe Taskmate::Jira::PayloadBuilder do
     }
   end
 
-  def issue(summary: "My task", issue_type: "Story", body: "Body.",
-            labels: [], components: [], priority: "Medium")
-    double("issue_file",
-           summary: summary, issue_type: issue_type, body: body,
-           labels: labels, components: components, priority: priority)
+  def issue(**opts)
+    defaults = { summary: "My task", issue_type: "Story", body: "Body.",
+                 labels: [], components: [], priority: "Medium" }
+    double("issue_file", **defaults, **opts)
   end
 
   describe "#build_create" do

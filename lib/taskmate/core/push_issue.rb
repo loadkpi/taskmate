@@ -17,7 +17,7 @@ module Taskmate
 
       READ_ONLY_FIELDS = %w[status assignee reporter created updated].freeze
 
-      def initialize(workspace_path:, jira_client:, security_policy:,
+      def initialize(workspace_path:, jira_client:, security_policy:, # rubocop:disable Metrics/ParameterLists
                      push_config: {}, story_points_field: nil, default_project: nil)
         @workspace_path     = workspace_path
         @jira_client        = jira_client
