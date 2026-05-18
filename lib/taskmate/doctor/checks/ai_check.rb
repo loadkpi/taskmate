@@ -21,7 +21,11 @@ module Taskmate
             return skip!("workspace.yml is malformed — skipping AI check")
           end
 
-          cfg      = Config::Loader.load(@workspace_path)
+          cfg = begin
+            Config::Loader.load(@workspace_path)
+          rescue Taskmate::ConfigError => e
+            return fail!("Config invalid: #{e.message}")
+          end
           provider = cfg.ai.provider.to_s
           if provider.empty? || provider == "disabled"
             skip!("AI provider disabled in workspace.yml (online check added in M6)")

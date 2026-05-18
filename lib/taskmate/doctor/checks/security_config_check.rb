@@ -25,7 +25,11 @@ module Taskmate
           return fail!("security section missing in workspace.yml") unless security
           return fail!("security section must be a mapping, got #{security.class}") unless security.is_a?(Hash)
 
-          cfg        = Config::Loader.load(@workspace_path)
+          cfg = begin
+            Config::Loader.load(@workspace_path)
+          rescue Taskmate::ConfigError => e
+            return fail!("Config invalid: #{e.message}")
+          end
           sec        = cfg.security
           violations = []
           violations << "require_consent_for_ai should be true"   unless sec.require_consent_for_ai

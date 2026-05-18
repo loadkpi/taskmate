@@ -37,7 +37,16 @@ RSpec.describe Taskmate::Config::Loader do
 
   describe ".load" do
     context "with no workspace.yml" do
+      it "raises ConfigError with a helpful message" do
+        expect { described_class.load(workspace, env: {}) }
+          .to raise_error(Taskmate::ConfigError, /workspace\.yml not found.*taskmate init/i)
+      end
+    end
+
+    context "with a minimal valid workspace.yml" do
       subject(:cfg) { described_class.load(workspace, env: {}) }
+
+      before { write_workspace_yml("---\n{}\n") }
 
       it "returns an AppConfig" do
         expect(cfg).to be_a(Taskmate::Config::AppConfig)
@@ -232,10 +241,32 @@ RSpec.describe Taskmate::Config::Loader do
     context "when workspace.yml has invalid YAML" do
       before { write_workspace_yml("foo: [unclosed") }
 
-      it "treats invalid YAML as empty config and returns AppConfig with defaults" do
-        cfg = described_class.load(workspace, env: {})
-        expect(cfg).to be_a(Taskmate::Config::AppConfig)
-        expect(cfg.tracker.base_url).to eq("")
+      it "raises ConfigError" do
+        expect { described_class.load(workspace, env: {}) }
+          .to raise_error(Taskmate::ConfigError, /invalid YAML/i)
+      end
+    end
+
+    context "when workspace.yml root is not a Hash" do
+      before { write_workspace_yml("- item1\n- item2\n") }
+
+      it "raises ConfigError" do
+        expect { described_class.load(workspace, env: {}) }
+          .to raise_error(Taskmate::ConfigError, /must be a Hash/i)
+      end
+    end
+
+    context "when workspace.yml has invalid config values" do
+      before do
+        write_workspace_yml(<<~YAML)
+          ai:
+            provider: badprovider
+        YAML
+      end
+
+      it "raises ConfigError with validation details" do
+        expect { described_class.load(workspace, env: {}) }
+          .to raise_error(Taskmate::ConfigError, /ai\.provider.*invalid/i)
       end
     end
   end

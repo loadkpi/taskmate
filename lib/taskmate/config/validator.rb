@@ -19,6 +19,7 @@ module Taskmate
         errs.concat(ai_errors(raw["ai"])) if raw.key?("ai")
         errs.concat(security_errors(raw["security"])) if raw.key?("security")
         errs.concat(push_errors(raw["push"])) if raw.key?("push")
+        errs << "jira must be a Hash" if raw.key?("jira") && !raw["jira"].is_a?(Hash)
         errs
       end
 

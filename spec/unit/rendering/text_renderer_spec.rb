@@ -12,7 +12,7 @@ RSpec.describe Taskmate::Rendering::TextRenderer do
     defaults = { key: "FOO-1", summary: "Summary", status: "Open",
                  priority: "High", issue_type: "Story", assignee: nil,
                  labels: [], body: "Body text", frontmatter: {} }
-    double("issue_file", **defaults.merge(opts))
+    double("issue_file", **defaults, **opts)
   end
 
   def make_assignee(display_name: "Alice")

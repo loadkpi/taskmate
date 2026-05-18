@@ -19,9 +19,24 @@ module Taskmate
 
       # Returns an AppConfig value object.
       # Merges defaults < workspace.yml < ENV overrides.
+      # Raises Taskmate::ConfigError if workspace.yml is missing, malformed, or invalid.
       def self.load(workspace_path, env: ENV)
         raw = load_raw(workspace_path)
-        raw = {} unless raw.is_a?(Hash)
+
+        case raw
+        when :not_found
+          raise Taskmate::ConfigError,
+                "workspace.yml not found in #{workspace_path}. Run `taskmate init` to create one."
+        when :invalid_yaml
+          raise Taskmate::ConfigError,
+                "#{File.join(workspace_path, 'workspace.yml')} contains invalid YAML. " \
+                "Fix the syntax and try again."
+        when :invalid_structure
+          raise Taskmate::ConfigError,
+                "workspace.yml root must be a Hash (YAML mapping). Fix the structure and try again."
+        end
+
+        Validator.validate!(raw)
         raw = deep_merge(DEFAULTS, raw)
         build_config(raw, env: env)
       end

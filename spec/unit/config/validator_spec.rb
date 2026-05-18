@@ -80,6 +80,21 @@ RSpec.describe Taskmate::Config::Validator do
         expect(described_class.errors("push" => true)).to include("push must be a Hash")
       end
     end
+
+    context "jira (legacy) section" do
+      it "returns no errors when jira is a Hash" do
+        expect(described_class.errors("jira" => { "base_url" => "https://x.atlassian.net" })).to eq([])
+      end
+
+      it "returns error when jira is not a Hash" do
+        errs = described_class.errors("jira" => "bad")
+        expect(errs).to include(match(/jira must be a Hash/))
+      end
+
+      it "returns no errors when jira key is absent" do
+        expect(described_class.errors({})).to eq([])
+      end
+    end
   end
 
   # ─── validate! ────────────────────────────────────────────────────────────
