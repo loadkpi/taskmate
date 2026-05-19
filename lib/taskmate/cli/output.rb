@@ -18,11 +18,11 @@ module Taskmate
       end
 
       def self.error(msg)
-        warn pastel.red(msg)
+        $stderr.puts pastel.red(msg)
       end
 
       def self.warn(msg)
-        warn pastel.yellow(msg)
+        $stderr.puts pastel.yellow(msg)
       end
 
       def self.info(msg)

@@ -8,7 +8,7 @@ module Taskmate
 
       DEFAULTS = {
         "tracker" => { "base_url" => "", "default_project" => "", "story_points_field" => nil },
-        "ai" => { "provider" => "disabled", "model" => nil, "enabled" => true },
+        "ai" => { "model" => nil, "enabled" => true },
         "security" => {
           "require_consent_for_ai" => true,
           "require_confirm_for_push" => true,
