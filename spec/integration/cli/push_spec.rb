@@ -17,8 +17,7 @@ RSpec.describe Taskmate::CLI::Commands::Push do
 
   let(:fake_policy) do
     instance_double(Taskmate::Security::Policy).tap do |p|
-      allow(p).to receive(:authorize_jira_write).and_return(:allow)
-      allow(p).to receive(:write_action_audit).and_return(nil)
+      allow(p).to receive_messages(authorize_jira_write: :allow, write_action_audit: nil)
     end
   end
 

@@ -28,7 +28,9 @@ module Taskmate
             File.exist?(File.join(skills_dir, skill, "skill.md"))
           end
 
-          return fail!("Missing built-in skills: #{missing.join(', ')}. Run `taskmate init` to copy them.") unless missing.empty?
+          unless missing.empty?
+            return fail!("Missing built-in skills: #{missing.join(', ')}. Run `taskmate init` to copy them.")
+          end
 
           invalid = invalid_skills
           if invalid.empty?
@@ -45,12 +47,10 @@ module Taskmate
           validator = Skills::Validator.new
 
           EXPECTED_SKILLS.filter_map do |skill_id|
-            begin
-              result = validator.validate(loader.load(skill_id))
-              skill_id unless result.valid?
-            rescue Skills::Loader::SkillLoadError
-              skill_id
-            end
+            result = validator.validate(loader.load(skill_id))
+            skill_id unless result.valid?
+          rescue Skills::Loader::SkillLoadError
+            skill_id
           end
         end
       end
