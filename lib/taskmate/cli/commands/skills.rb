@@ -18,15 +18,21 @@ module Taskmate
         def list(workspace_path = Dir.pwd)
           validate_format!
           registry = ::Taskmate::Skills::Registry.new(workspace_path: workspace_path)
-          skills   = registry.all
+          results  = registry.validate_all
 
           if fmt == "json"
-            render_json(skills.map { |s| skill_summary(s) })
-          elsif skills.empty?
+            render_json(results.map { |r| list_summary(r) })
+          elsif results.empty?
             puts "No skills found in #{workspace_path}/skills/"
           else
-            skills.each do |s|
-              puts format("  %<id>-30s  v%<version>-6s  %<kind>s", id: s.id, version: s.version.to_s, kind: s.kind.to_s)
+            results.each do |r|
+              if r[:result].valid?
+                s = r[:skill]
+                puts format("  %<id>-30s  v%<version>-6s  %<kind>s",
+                             id: s.id, version: s.version.to_s, kind: s.kind.to_s)
+              else
+                puts format("  %<id>-30s  [BROKEN]  %<error>s", id: r[:skill].id, error: r[:result].errors.first.to_s)
+              end
             end
           end
         end
@@ -112,8 +118,12 @@ module Taskmate
           puts all_valid ? "\nAll skills valid." : "\nSome skills have errors."
         end
 
-        def skill_summary(skill)
-          { "id" => skill.id, "version" => skill.version.to_s, "kind" => skill.kind }
+        def list_summary(r)
+          if r[:result].valid?
+            { "id" => r[:skill].id, "version" => r[:skill].version.to_s, "kind" => r[:skill].kind }
+          else
+            { "id" => r[:skill].id, "version" => nil, "kind" => nil, "broken" => true, "errors" => r[:result].errors }
+          end
         end
 
         def skill_detail(skill)

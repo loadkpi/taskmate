@@ -62,6 +62,14 @@ RSpec.describe Taskmate::CLI::Commands::Skills do
 
         expect(output).to include("No skills found")
       end
+
+      it "shows [BROKEN] for skills that fail validation" do
+        write_broken_skill(id: "broken-skill")
+        output = capture_stdout { command.list(workspace) }
+
+        expect(output).to include("[BROKEN]")
+        expect(output).to include("broken-skill")
+      end
     end
 
     context "with json output" do
@@ -76,6 +84,17 @@ RSpec.describe Taskmate::CLI::Commands::Skills do
         expect(skill).not_to be_nil
         expect(skill["version"]).to eq("1")
         expect(skill["kind"]).to eq("task_review")
+      end
+
+      it "includes broken skills in json output with broken: true" do
+        write_broken_skill(id: "broken-skill")
+
+        data = JSON.parse(capture_stdout { command.list(workspace) })
+
+        entry = data.find { |s| s["id"] == "broken-skill" }
+        expect(entry).not_to be_nil
+        expect(entry["broken"]).to be(true)
+        expect(entry["errors"]).not_to be_empty
       end
     end
 
