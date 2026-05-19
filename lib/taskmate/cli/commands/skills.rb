@@ -29,7 +29,7 @@ module Taskmate
               if r[:result].valid?
                 s = r[:skill]
                 puts format("  %<id>-30s  v%<version>-6s  %<kind>s",
-                             id: s.id, version: s.version.to_s, kind: s.kind.to_s)
+                            id: s.id, version: s.version.to_s, kind: s.kind.to_s)
               else
                 puts format("  %<id>-30s  [BROKEN]  %<error>s", id: r[:skill].id, error: r[:result].errors.first.to_s)
               end
@@ -118,11 +118,12 @@ module Taskmate
           puts all_valid ? "\nAll skills valid." : "\nSome skills have errors."
         end
 
-        def list_summary(r)
-          if r[:result].valid?
-            { "id" => r[:skill].id, "version" => r[:skill].version.to_s, "kind" => r[:skill].kind }
+        def list_summary(entry)
+          if entry[:result].valid?
+            { "id" => entry[:skill].id, "version" => entry[:skill].version.to_s, "kind" => entry[:skill].kind }
           else
-            { "id" => r[:skill].id, "version" => nil, "kind" => nil, "broken" => true, "errors" => r[:result].errors }
+            { "id" => entry[:skill].id, "version" => nil, "kind" => nil,
+              "broken" => true, "errors" => entry[:result].errors }
           end
         end
 
